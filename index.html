@@ -2,15 +2,23 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Трекер автобусов | Пассажир-Онлайн</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background-color: #f0f2f5; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        header { background: #ffffff; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.08); z-index: 1000; }
+        html, body { width: 100%; max-width: 100vw; overflow-x: hidden; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex; flex-direction: column;
+            height: 100vh;
+            height: 100dvh; /* динамическая высота — учитывает адресную строку */
+            overflow: hidden;
+        }
+        header { background: #ffffff; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.08); z-index: 1000; flex-shrink: 0; }
         .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: #1a1a2e; }
         .logo i { color: #2563eb; font-size: 24px; }
         .header-right { display: flex; align-items: center; gap: 12px; }
@@ -23,7 +31,7 @@
         .header-status { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #059669; background: #ecfdf5; padding: 6px 14px; border-radius: 30px; font-weight: 500; }
         .header-status .dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-        .main-container { display: flex; flex: 1; overflow: hidden; }
+        .main-container { display: flex; flex: 1; overflow: hidden; min-height: 0; }
         .sidebar { width: 380px; background: #ffffff; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.03); z-index: 500; position: relative; }
         .sidebar-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
         .sidebar-header h2 { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 12px; }
@@ -135,7 +143,7 @@
             font-weight: 700;
         }
 
-        #map { flex: 1; height: 100%; z-index: 1; background: #aad3df; }
+        #map { flex: 1; height: 100%; z-index: 1; background: #aad3df; min-height: 0; }
         @keyframes waiting-pulse { 0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.3); } 50% { box-shadow: 0 2px 18px rgba(0,0,0,0.7); } }
         @keyframes nextStopPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
         .next-stop-ring { animation: nextStopPulse 1.5s ease-in-out infinite; }
@@ -145,7 +153,23 @@
         .parking-tooltip::before { border-top-color: #64748b; }
         .leaflet-popup-content-wrapper { border-radius: 10px; }
         .leaflet-popup-content { margin: 12px 14px; }
+
         @media (max-width: 768px) {
+            header {
+                padding: 8px 10px;
+                gap: 6px;
+                flex-wrap: nowrap;
+            }
+            .logo { font-size: 15px; gap: 6px; flex-shrink: 0; }
+            .logo i { font-size: 18px; }
+            .header-right { gap: 5px; flex-shrink: 1; min-width: 0; }
+            .mode-btn { padding: 5px 8px; font-size: 12px; }
+            .header-time { padding: 4px 8px; font-size: 12px; gap: 4px; }
+            .header-time .tz { font-size: 9px; }
+            .header-time i { font-size: 11px; }
+            .header-status { padding: 4px 8px; font-size: 11px; gap: 4px; }
+            .mode-btn span { display: none; }
+
             .main-container { flex-direction: column; }
             .sidebar {
                 width: 100%;
@@ -154,9 +178,7 @@
                 border-right: none;
                 border-bottom: 1px solid #e5e7eb;
             }
-            #map { height: auto; flex: 1; }
-            .mode-btn span { display: none; }
-            .mode-btn { padding: 6px 10px; }
+            #map { height: auto; flex: 1; min-height: 0; }
         }
     </style>
 </head>
@@ -1385,6 +1407,7 @@
         }
         updateModeButton();
         renderBusList(currentFilter);
+        setTimeout(() => map.invalidateSize(), 50);
     });
 
     map.on('click', function(e) {
@@ -1400,6 +1423,14 @@
             <b>Координаты:</b> [${y}, ${x}]<br>
             ${closest ? `Ближайшее: <b>${closest.name}</b><br><code style="font-size:11px">[${y}, ${x}]</code>` : ''}
         `).openOn(map);
+    });
+
+    // Пересчёт размера карты при изменении окна/повороте экрана
+    window.addEventListener('resize', () => {
+        setTimeout(() => map.invalidateSize(), 100);
+    });
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => map.invalidateSize(), 200);
     });
 
     updateModeButton();

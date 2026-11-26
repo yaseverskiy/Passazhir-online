@@ -24,24 +24,117 @@
         .header-status .dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
         .main-container { display: flex; flex: 1; overflow: hidden; }
-        .sidebar { width: 380px; background: #ffffff; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.03); z-index: 500; }
+        .sidebar { width: 380px; background: #ffffff; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.03); z-index: 500; position: relative; }
         .sidebar-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
         .sidebar-header h2 { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 12px; }
-        .route-filters { display: flex; flex-wrap: wrap; gap: 8px; }
-        .route-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #d1d5db; background: white; font-size: 13px; font-weight: 500; color: #4b5563; cursor: pointer; transition: all 0.2s; }
-        .route-btn.active { background: #2563eb; border-color: #2563eb; color: white; }
-        .route-btn:hover { border-color: #2563eb; }
-        .bus-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
-        .bus-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        .bus-card:hover { border-color: #2563eb; box-shadow: 0 4px 12px rgba(37,99,235,0.12); transform: translateY(-1px); }
-        .bus-card.active { border-color: #2563eb; background: #eff6ff; box-shadow: 0 4px 16px rgba(37,99,235,0.2); }
-        .bus-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; background: rgba(37, 99, 235, 0.12); color: #2563eb; }
-        .bus-info { flex: 1; }
-        .bus-route { font-weight: 600; font-size: 14px; color: #1f2937; }
-        .bus-details { font-size: 12px; color: #6b7280; margin-top: 3px; }
-        .bus-eta { text-align: right; flex-shrink: 0; }
-        .eta-time { font-weight: 700; font-size: 16px; color: #1f2937; font-variant-numeric: tabular-nums; }
-        .eta-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* ── Выбор маршрута (выпадающий) ── */
+        .route-picker { position: relative; }
+        .route-picker-trigger {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            width: 100%; padding: 10px 14px; border-radius: 12px;
+            border: 1.5px solid #d1d5db; background: #fff; cursor: pointer;
+            font-family: inherit; font-size: 14px; font-weight: 600; color: #1f2937;
+            transition: all 0.2s;
+        }
+        .route-picker-trigger:hover { border-color: #2563eb; box-shadow: 0 2px 8px rgba(37,99,235,0.1); }
+        .route-picker-trigger.open { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        .route-picker-trigger .rpt-left { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+        .route-picker-trigger .rpt-left i { color: #2563eb; font-size: 15px; flex-shrink: 0; }
+        .route-picker-trigger .rpt-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .route-picker-trigger .rpt-caret { color: #9ca3af; font-size: 12px; transition: transform 0.2s; }
+        .route-picker-trigger.open .rpt-caret { transform: rotate(180deg); }
+        .route-picker-trigger .rpt-clear { color: #9ca3af; font-size: 13px; padding: 2px 4px; border-radius: 4px; }
+        .route-picker-trigger .rpt-clear:hover { color: #dc2626; background: #fef2f2; }
+
+        .route-picker-panel {
+            position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 600;
+            background: #fff; border: 1px solid #e5e7eb; border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;
+            opacity: 0; transform: translateY(-6px); pointer-events: none; transition: all 0.18s;
+            max-height: 60vh; overflow-y: auto;
+        }
+        .route-picker-panel.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        /* ── Плоский список направлений ── */
+        .rpp-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; cursor: pointer; transition: background 0.12s;
+            font-size: 14px; color: #374151; font-weight: 500;
+        }
+        .rpp-item:hover { background: #f3f4f6; }
+        .rpp-item.selected { background: #eff6ff; color: #1d4ed8; font-weight: 600; }
+
+        /* Чекбокс слева */
+        .rpp-checkbox {
+            width: 20px; height: 20px; border-radius: 6px;
+            border: 2px solid #d1d5db; background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.15s;
+        }
+        .rpp-item:hover .rpp-checkbox { border-color: #93c5fd; }
+        .rpp-item.selected .rpp-checkbox {
+            background: #2563eb; border-color: #2563eb;
+        }
+        .rpp-checkbox i {
+            color: #fff; font-size: 11px; opacity: 0;
+            transform: scale(0.5); transition: all 0.15s;
+        }
+        .rpp-item.selected .rpp-checkbox i { opacity: 1; transform: scale(1); }
+
+        .rpp-item .rpp-dir { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* ── Футер панели с кнопками ── */
+        .rpp-footer {
+            display: flex; gap: 8px; padding: 10px 12px;
+            border-top: 1px solid #f3f4f6; background: #fafafa;
+            position: sticky; bottom: 0;
+        }
+        .rpp-btn {
+            flex: 1; padding: 9px 12px; border-radius: 10px;
+            font-family: inherit; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.15s; border: 1.5px solid transparent;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .rpp-btn-reset {
+            background: #fff; border-color: #e5e7eb; color: #6b7280;
+        }
+        .rpp-btn-reset:hover { border-color: #dc2626; color: #dc2626; background: #fef2f2; }
+        .rpp-btn-apply {
+            background: #2563eb; color: #fff;
+        }
+        .rpp-btn-apply:hover { background: #1d4ed8; }
+        .rpp-btn-apply:disabled {
+            background: #93c5fd; cursor: not-allowed;
+        }
+
+        /* ── Список автобусов скрыт ── */
+        .bus-list { display: none !important; }
+
+        /* ── Сводка по выбранным направлениям ── */
+        .route-summary {
+            margin: 8px 16px 12px;
+            padding: 10px 14px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            display: none;
+        }
+        .route-summary.visible { display: block; }
+        .rs-count {
+            display: flex; align-items: baseline; gap: 8px;
+        }
+        .rs-number {
+            font-size: 28px; font-weight: 700; color: #1d4ed8;
+            line-height: 1; font-variant-numeric: tabular-nums;
+        }
+        .rs-label {
+            font-size: 13px; font-weight: 500; color: #1e40af;
+        }
+        .rs-label-title {
+            font-weight: 700;
+        }
+
         #map { flex: 1; height: 100%; z-index: 1; background: #aad3df; }
         @keyframes waiting-pulse { 0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.3); } 50% { box-shadow: 0 2px 18px rgba(0,0,0,0.7); } }
         @keyframes nextStopPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
@@ -54,8 +147,14 @@
         .leaflet-popup-content { margin: 12px 14px; }
         @media (max-width: 768px) {
             .main-container { flex-direction: column; }
-            .sidebar { width: 100%; height: 40%; border-right: none; border-bottom: 1px solid #e5e7eb; }
-            #map { height: 60%; }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-shrink: 0;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+            }
+            #map { height: auto; flex: 1; }
             .mode-btn span { display: none; }
             .mode-btn { padding: 6px 10px; }
         }
@@ -79,10 +178,26 @@
     <div class="main-container">
         <div class="sidebar">
             <div class="sidebar-header">
-                <h2>Фильтр по маршрутам</h2>
-                <div class="route-filters">
-                    <button class="route-btn active" data-route="all">Все</button>
-                    <button class="route-btn" data-route="442">Маршрут 442</button>
+                <h2>Выберите маршрут</h2>
+                <div class="route-picker" id="routePicker">
+                    <button class="route-picker-trigger" id="routePickerTrigger">
+                        <span class="rpt-left">
+                            <i class="fas fa-route"></i>
+                            <span class="rpt-label" id="routePickerLabel">Выберите маршрут</span>
+                        </span>
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <span class="rpt-clear" id="routePickerClear" title="Сбросить" style="display:none;"><i class="fas fa-xmark"></i></span>
+                            <i class="fas fa-chevron-down rpt-caret"></i>
+                        </span>
+                    </button>
+                    <div class="route-picker-panel" id="routePickerPanel"></div>
+                </div>
+            </div>
+            <div class="route-summary" id="routeSummary">
+                <div class="rs-count">
+                    <span class="rs-label rs-label-title">На линии:</span>
+                    <span class="rs-number" id="rsNumber">0</span>
+                    <span class="rs-label" id="rsLabel">автобусов</span>
                 </div>
             </div>
             <div class="bus-list" id="busList"></div>
@@ -397,11 +512,11 @@
         const hm = d.getHours() * 60 + d.getMinutes();
         const at = (h, m) => h * 60 + m;
 
-        if (hm >= at(6, 30) && hm < at(8, 30))   return [80, 100];  // утренний час пик
-        if (hm >= at(8, 30) && hm < at(15, 0))   return [55, 80];   // дневное межпиковое
-        if (hm >= at(15, 0) && hm < at(18, 30))  return [80, 100];  // вечерний час пик
-        if (hm >= at(18, 30) && hm < at(22, 30)) return [25, 50];   // вечернее межпиковое
-        return [5, 25];                                              // ночь / раннее утро
+        if (hm >= at(6, 30) && hm < at(8, 30))   return [80, 100];
+        if (hm >= at(8, 30) && hm < at(15, 0))   return [55, 80];
+        if (hm >= at(15, 0) && hm < at(18, 30))  return [80, 100];
+        if (hm >= at(18, 30) && hm < at(22, 30)) return [25, 50];
+        return [5, 25];
     }
 
     function getBusLoad(bus) {
@@ -495,13 +610,201 @@
         return marker;
     });
 
+    // ============================================================
+    // ВЫПАДАЮЩИЙ ВЫБОР МАРШРУТА + НАПРАВЛЕНИЯ (мультивыбор)
+    // ============================================================
     let currentFilter = 'all';
+    let currentDirection = [];
+
+    const picker = document.getElementById('routePicker');
+    const pickerTrigger = document.getElementById('routePickerTrigger');
+    const pickerPanel = document.getElementById('routePickerPanel');
+    const pickerLabel = document.getElementById('routePickerLabel');
+    const pickerClear = document.getElementById('routePickerClear');
+
+    function getBusDirection(bus) {
+        if (bus.phase === 'parked' || bus.phase === 'arriving') {
+            return bus.currentTerminal === 'patp' ? 1 : -1;
+        }
+        return bus.direction;
+    }
+
+    function updateRouteSummary() {
+        const summary = document.getElementById('routeSummary');
+        const numEl = document.getElementById('rsNumber');
+        const labelEl = document.getElementById('rsLabel');
+
+        if (!summary) return;
+
+        if (currentDirection.length === 0) {
+            summary.classList.remove('visible');
+            return;
+        }
+
+        let count = 0;
+        buses.forEach(bus => {
+            const dir = getBusDirection(bus);
+            if (currentDirection.includes(dir)) count++;
+        });
+
+        const n = count;
+        const mod10 = n % 10, mod100 = n % 100;
+        let word = 'автобусов';
+        if (mod10 === 1 && mod100 !== 11) word = 'автобус';
+        else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) word = 'автобуса';
+
+        numEl.textContent = count;
+        labelEl.textContent = word;
+        summary.classList.add('visible');
+    }
+
+    function buildRoutePicker() {
+        const directions = [
+            { dir: 1,  text: '442 (Серпов → Еманкаши)' },
+            { dir: -1, text: '442 (Еманкаши → Серпов)' }
+        ];
+
+        let draftDirs = [...currentDirection];
+
+        pickerPanel.innerHTML = directions.map(d => {
+            const selected = draftDirs.includes(d.dir);
+            return `<div class="rpp-item${selected ? ' selected' : ''}" data-dir="${d.dir}">
+                <span class="rpp-checkbox"><i class="fas fa-check"></i></span>
+                <span class="rpp-dir">${d.text}</span>
+            </div>`;
+        }).join('') + `
+            <div class="rpp-footer">
+                <button class="rpp-btn rpp-btn-reset" id="rppReset">
+                    <i class="fas fa-xmark"></i>Сбросить
+                </button>
+                <button class="rpp-btn rpp-btn-apply" id="rppApply" ${draftDirs.length === 0 ? 'disabled' : ''}>
+                    <i class="fas fa-check"></i>Показать
+                </button>
+            </div>`;
+
+        const updateDraftUI = () => {
+            pickerPanel.querySelectorAll('.rpp-item').forEach(it => {
+                it.classList.toggle('selected', draftDirs.includes(Number(it.dataset.dir)));
+            });
+            document.getElementById('rppApply').disabled = (draftDirs.length === 0);
+        };
+
+        pickerPanel.querySelectorAll('.rpp-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const d = Number(item.dataset.dir);
+                const idx = draftDirs.indexOf(d);
+                if (idx >= 0) draftDirs.splice(idx, 1);
+                else draftDirs.push(d);
+                updateDraftUI();
+            });
+        });
+
+        document.getElementById('rppReset').addEventListener('click', () => {
+            draftDirs = [];
+            updateDraftUI();
+
+            currentDirection = [];
+            currentFilter = 'all';
+            applyPickerState();
+            renderBusList(currentFilter);
+            updateRouteVisibility();
+        });
+
+        document.getElementById('rppApply').addEventListener('click', () => {
+            if (draftDirs.length === 0) return;
+            currentDirection = [...draftDirs];
+            currentFilter = '442';
+            closePicker();
+            applyPickerState();
+            renderBusList(currentFilter);
+            updateRouteVisibility();
+        });
+    }
+
+    function applyPickerState() {
+        if (currentDirection.length === 0) {
+            pickerLabel.textContent = 'Выберите маршрут';
+            pickerClear.style.display = 'none';
+            pickerTrigger.classList.remove('open');
+        } else if (currentDirection.length === 2) {
+            pickerLabel.textContent = 'Маршрут 442 · оба направления';
+            pickerClear.style.display = 'inline-flex';
+        } else {
+            const dirText = currentDirection[0] === 1 ? 'Серпов → Еманкаши' : 'Еманкаши → Серпов';
+            pickerLabel.textContent = `Маршрут 442 · ${dirText}`;
+            pickerClear.style.display = 'inline-flex';
+        }
+    }
+
+    function openPicker() { pickerPanel.classList.add('open'); pickerTrigger.classList.add('open'); }
+    function closePicker() { pickerPanel.classList.remove('open'); pickerTrigger.classList.remove('open'); }
+    function togglePicker() { pickerPanel.classList.contains('open') ? closePicker() : (buildRoutePicker(), openPicker()); }
+
+    pickerTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (e.target.closest('#routePickerClear')) return;
+        togglePicker();
+    });
+
+    pickerClear.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentDirection = [];
+        currentFilter = 'all';
+        closePicker();
+        applyPickerState();
+        renderBusList(currentFilter);
+        updateRouteVisibility();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!picker.contains(e.target)) closePicker();
+    });
+
+    setInterval(() => {
+        if (pickerPanel.classList.contains('open')) buildRoutePicker();
+    }, 5000);
+
     function updateRouteVisibility() {
-        const visible = currentFilter === 'all' || currentFilter === '442';
+        updateRouteSummary();
+        const visible = currentDirection.length > 0;
+
         [routePassedLayer, routeRemainingLayer, ...stopMarkers, ...parkingMarkers].forEach(layer => {
             if (visible && !map.hasLayer(layer)) layer.addTo(map);
             else if (!visible && map.hasLayer(layer)) map.removeLayer(layer);
         });
+
+        buses.forEach(bus => {
+            const dir = getBusDirection(bus);
+            const showBus = visible && currentDirection.includes(dir);
+
+            if (showBus) {
+                if (!map.hasLayer(bus.marker)) bus.marker.addTo(map);
+            } else {
+                if (map.hasLayer(bus.marker)) {
+                    bus.marker.closePopup();
+                    map.removeLayer(bus.marker);
+                }
+            }
+        });
+
+        const activeBus = buses.find(b => b.id === activeBusId);
+        if (nextStopRing && activeBus) {
+            const dir = getBusDirection(activeBus);
+            const showRing = visible && currentDirection.includes(dir);
+            if (showRing) {
+                if (!map.hasLayer(nextStopRing)) nextStopRing.addTo(map);
+            } else {
+                if (map.hasLayer(nextStopRing)) map.removeLayer(nextStopRing);
+            }
+        }
+
+        if (currentDirection.length === 1) {
+            routePassedLayer.setStyle({ opacity: 0.35 });
+            routeRemainingLayer.setStyle({ opacity: 0.35 });
+        } else {
+            routePassedLayer.setStyle({ opacity: 0.7 });
+            routeRemainingLayer.setStyle({ opacity: 0.85 });
+        }
     }
 
     function positionAtProgress(path, cum, s) {
@@ -566,7 +869,7 @@
     }
 
     // ============================================================
-    // ВЫЧИСЛЕНИЕ ПОЗИЦИИ ПО РАСПИСАНИЮ (живёт всегда)
+    // ВЫЧИСЛЕНИЕ ПОЗИЦИИ ПО РАСПИСАНИЮ
     // ============================================================
     function elapsedToProgress(elapsedSec, direction) {
         let timeLeft = elapsedSec;
@@ -792,7 +1095,7 @@
 
     buses.forEach(bus => {
         bus.marker = L.marker([bus.lat, bus.lng], { icon: makeBusIcon(bus), bubblingMouseEvents: false })
-            .bindPopup(getPopupHtml(bus)).addTo(map);
+            .bindPopup(getPopupHtml(bus));
         bus.marker.on('click', () => setActiveBus(bus.id));
     });
 
@@ -870,9 +1173,20 @@
     }
 
     function renderBusList(filterRoute = 'all') {
+        updateRouteSummary();
         const el = document.getElementById('busList');
+        if (!el) return;
         el.innerHTML = '';
-        const filtered = filterRoute === 'all' ? buses : buses.filter(b => b.route === filterRoute);
+
+        let filtered = filterRoute === 'all' ? buses : buses.filter(b => b.route === filterRoute);
+
+        if (currentDirection.length > 0) {
+            filtered = filtered.filter(b => {
+                const d = getBusDirection(b);
+                return currentDirection.includes(d);
+            });
+        }
+
         filtered.forEach(bus => {
             const isActive = bus.id === activeBusId;
             let st = getStatusText(bus);
@@ -1040,6 +1354,7 @@
             renderAccum = 0;
             renderBusList(currentFilter);
             updateNextStopHighlight();
+            updateRouteVisibility();
         }
         popupAccum += dt_real;
         if (popupAccum >= 5) { popupAccum = 0; buses.forEach(updatePopup); }
@@ -1072,16 +1387,6 @@
         renderBusList(currentFilter);
     });
 
-    document.querySelectorAll('.route-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.route-btn').forEach(b => b.classList.remove('active'));
-            e.currentTarget.classList.add('active');
-            currentFilter = e.currentTarget.dataset.route;
-            renderBusList(currentFilter);
-            updateRouteVisibility();
-        });
-    });
-
     map.on('click', function(e) {
         const y = Math.round(e.latlng.lat), x = Math.round(e.latlng.lng);
         let closest = null, minDist = Infinity;
@@ -1098,8 +1403,10 @@
     });
 
     updateModeButton();
+    applyPickerState();
+    updateRouteSummary();
     document.getElementById('simTimeText').textContent = formatTimeWithSeconds(simTime);
-    renderBusList();
+    renderBusList(currentFilter);
     updateRouteVisibility();
     requestAnimationFrame(animate);
     </script>

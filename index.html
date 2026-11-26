@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Трекер автобусов | Пассажир-Онлайн</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -120,6 +120,19 @@
         @keyframes waiting-pulse { 0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.3); } 50% { box-shadow: 0 2px 18px rgba(0,0,0,0.7); } }
         @keyframes nextStopPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
         .next-stop-ring { animation: nextStopPulse 1.5s ease-in-out infinite; }
+
+        /* ── Бейдж с номером маршрута ── */
+        .bus-route-badge {
+            font-family: 'Inter', 'Intro', sans-serif;
+            font-weight: 900;
+            letter-spacing: -0.3px;
+            line-height: 1;
+            white-space: nowrap;
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
         .stop-tooltip { background: #1e40af; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 500; padding: 4px 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
         .stop-tooltip::before { border-top-color: #1e40af; }
         .parking-tooltip { background: #64748b; color: #fff; border: none; border-radius: 6px; font-size: 11px; font-weight: 500; padding: 3px 7px; }
@@ -607,7 +620,7 @@
     }
 
     // ============================================================
-    // ЗАПОЛНЕННОСТЬ (по маршруту + плавное набивание по пути)
+    // ЗАПОЛНЕННОСТЬ
     // ============================================================
     function seededNoise(seed, x) {
         const s = Math.sin(seed * 12.9898 + x * 78.233) * 43758.5453;
@@ -629,7 +642,6 @@
         return r.night;
     }
 
-    // Коэффициент набивания по прогрессу: 0 → пустой, 0.5 → полный, 1 → пустеет
     function progressLoadFactor(ratio) {
         if (ratio <= 0) return 0.15;
         if (ratio >= 1) return 0.15;
@@ -977,9 +989,12 @@
     function makeBusIcon(bus) {
         const route = ROUTES[bus.routeId];
         const isActive = bus.id === activeBusId;
-        const size = isActive ? 38 : 32, anchor = size / 2;
+        const size = isActive ? 38 : 32;
         const border = isActive ? '3px' : '2px';
         const fontSize = isActive ? '16px' : '14px';
+        const badgeFontSize = isActive ? '12px' : '11px';
+        const badgePadding = isActive ? '3px 6px' : '2px 5px';
+        const badgeGap = 1;
         let bg, icon, anim = '';
         if (bus.phase === 'parked') { bg = PARKED_COLOR; icon = '<i class="fas fa-pause"></i>'; anim = 'animation: waiting-pulse 2s infinite;'; }
         else if (bus.phase === 'departing' || bus.phase === 'arriving') { bg = TRANSIT_COLOR; icon = '<i class="fas fa-bus"></i>'; }
@@ -997,13 +1012,20 @@
             </div>`;
         }
 
+        const badgeWidth = route.id.length * 8 + 14;
+        const totalWidth = size + badgeGap + badgeWidth;
+
         return L.divIcon({
             className: '',
-            html: `<div style="position: relative; width: ${size}px; height: ${size}px;">
-                <div style="background: ${bg}; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: ${fontSize}; border: ${border} solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); ${anim}">${icon}</div>
-                ${arrow}
+            html: `<div style="position: relative; width: ${totalWidth}px; height: ${size}px;">
+                <div style="position: absolute; left: 0; top: 0; width: ${size}px; height: ${size}px;">
+                    <div style="background: ${bg}; width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: ${fontSize}; border: ${border} solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); ${anim}">${icon}</div>
+                    ${arrow}
+                </div>
+                <div class="bus-route-badge" style="position: absolute; left: ${size + badgeGap}px; top: 50%; transform: translateY(-50%); color: ${route.color}; border: 1.5px solid ${route.color}; padding: ${badgePadding}; font-size: ${badgeFontSize};">${route.id}</div>
             </div>`,
-            iconSize: [size, size], iconAnchor: [anchor, anchor]
+            iconSize: [totalWidth, size],
+            iconAnchor: [size / 2, size / 2]
         });
     }
 

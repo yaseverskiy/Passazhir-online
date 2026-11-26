@@ -94,7 +94,7 @@
     <script>
     const CONFIG = {
         MODE: 'real',
-        DEMO_SPEED: 60,
+        DEMO_SPEED: 70,
         STOP_PAUSE_SEC: 15,
         TRANSIT_SEC: 8,
     };
@@ -104,15 +104,9 @@
     const PARKED_COLOR = '#94a3b8';
     let currentMode = CONFIG.MODE;
 
-    // ============================================================
-    // СКОРОСТИ ПО ЗОНАМ (км/ч)
-    // ============================================================
-    const SPEED_ZONE1_KMH = 45;   // ПАТП ↔ Речной порт
-    const SPEED_ZONE2_KMH = 65;   // Речной порт ↔ Еманкаши
+    const SPEED_ZONE1_KMH = 45;
+    const SPEED_ZONE2_KMH = 65;
 
-    // ============================================================
-    // ПАРКОВОЧНЫЕ МЕСТА
-    // ============================================================
     const PATP_PARKING = [
         [70, 289], [70, 295], [70, 301],
         [76, 289], [76, 295], [76, 301]
@@ -215,9 +209,6 @@
     const stopsWithS = stops442.map(s => ({ ...s, s: projectStopOnPath(s, route442, cum442) }));
     const intermediateStops = stopsWithS.slice(1, -1);
 
-    // ============================================================
-    // ГРАНИЦА ЗОН И РАСЧЁТ СКОРОСТЕЙ
-    // ============================================================
     const S_PORT = stopsWithS.find(s => s.name === 'Речной порт').s;
 
     const ONE_WAY_SEC = 30 * 60;
@@ -235,9 +226,8 @@
 
     console.log(`[442] S речного порта: ${S_PORT.toFixed(1)} ед.`);
     console.log(`[442] Маршрут: ${(PATH_LENGTH * MAP_METERS_PER_UNIT / 1000).toFixed(2)} км (масштаб ${MAP_METERS_PER_UNIT.toFixed(2)} м/ед.)`);
-    console.log(`[442] Зона 1 (ПАТП ↔ Речной порт): ${SPEED_ZONE1_KMH} км/ч, ${L1.toFixed(1)} ед.`);
-    console.log(`[442] Зона 2 (Речной порт ↔ Еманкаши): ${SPEED_ZONE2_KMH} км/ч, ${L2.toFixed(1)} ед.`);
     console.log(`[442] Время движения: ${MOVE_SEC_TOTAL} с, пауз: ${PAUSES_SEC_TOTAL} с → ${(MOVE_SEC_TOTAL + PAUSES_SEC_TOTAL) / 60} мин ✓`);
+    console.log(`[442] Демо-режим: x${CONFIG.DEMO_SPEED}`);
 
     function speedAt(s) { return s < S_PORT ? V1 : V2; }
 
@@ -300,9 +290,6 @@
 
     function easeInOutCubic(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
 
-    // ============================================================
-    // ПАРКОВОЧНЫЕ МЕСТА (визуальные)
-    // ============================================================
     const parkingMarkers = [];
     PATP_PARKING.forEach((p, i) => {
         parkingMarkers.push(L.circleMarker(p, {
@@ -322,9 +309,6 @@
         return spots[bus.parkingIndex % spots.length];
     }
 
-    // ============================================================
-    // СКОРОСТЬ АВТОБУСА (для отображения)
-    // ============================================================
     function busSpeedLabel(bus) {
         if (bus.phase === 'parked') return { text: 'ожидание', kmh: 0 };
         if (bus.phase === 'departing') return { text: 'выезд с парковки', kmh: 0 };
@@ -334,9 +318,6 @@
         return { text: `~${kmh} км/ч`, kmh };
     }
 
-    // ============================================================
-    // ETA ДО КОНКРЕТНОЙ ОСТАНОВКИ
-    // ============================================================
     function countPausesBetween(s1, s2) {
         if (s1 > s2) [s1, s2] = [s2, s1];
         let count = 0;
@@ -390,9 +371,6 @@
         return `${mins} мин`;
     }
 
-    // ============================================================
-    // СЛЕДУЮЩАЯ ОСТАНОВКА ДЛЯ АКТИВНОГО АВТОБУСА
-    // ============================================================
     function getNextStop(bus) {
         if (bus.phase !== 'driving') return null;
         const dir = bus.direction;
@@ -407,33 +385,36 @@
     }
 
     // ============================================================
-    // ЗАПОЛНЕННОСТЬ АВТОБУСА
+    // ЗАПОЛНЕННОСТЬ АВТОБУСА — интервалы по времени суток
     // ============================================================
     function seededNoise(seed, x) {
         const s = Math.sin(seed * 12.9898 + x * 78.233) * 43758.5453;
         return s - Math.floor(s);
     }
 
-    function baseLoadByHour(hour) {
-        if (hour >= 7 && hour < 10)  return 0.85;
-        if (hour >= 17 && hour < 20) return 0.85;
-        if (hour >= 10 && hour < 16) return 0.45;
-        if (hour >= 20 && hour < 22) return 0.45;
-        return 0.20;
+    function getLoadRange(ms) {
+        const d = new Date(ms);
+        const hm = d.getHours() * 60 + d.getMinutes();
+        const at = (h, m) => h * 60 + m;
+
+        if (hm >= at(6, 30) && hm < at(8, 30))   return [80, 100];  // утренний час пик
+        if (hm >= at(8, 30) && hm < at(15, 0))   return [55, 80];   // дневное межпиковое
+        if (hm >= at(15, 0) && hm < at(18, 30))  return [80, 100];  // вечерний час пик
+        if (hm >= at(18, 30) && hm < at(22, 30)) return [25, 50];   // вечернее межпиковое
+        return [5, 25];                                              // ночь / раннее утро
     }
 
-    // На конечной (parked) — данных о заполненности нет → null
     function getBusLoad(bus) {
         if (bus.phase === 'parked') return null;
-        const d = new Date(simTime);
-        const hour = d.getHours() + d.getMinutes() / 60;
-        const base = baseLoadByHour(hour);
+
+        const [minPct, maxPct] = getLoadRange(simTime);
+
         const seed = bus.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-        const personal = (seededNoise(seed, 1) - 0.5) * 0.24;
-        const wobble = (seededNoise(seed, Math.floor(simTime / 60000)) - 0.5) * 0.10;
-        let pct = (base + personal + wobble) * 100;
-        pct = Math.max(5, Math.min(98, pct));
-        return Math.round(pct);
+        const slot = Math.floor(simTime / (3 * 60 * 1000));
+        const rnd = seededNoise(seed * 31 + slot, 1);
+
+        const pct = Math.round(minPct + (maxPct - minPct) * rnd);
+        return Math.max(1, Math.min(100, pct));
     }
 
     function loadColor(pct) {
@@ -497,9 +478,6 @@
         return html;
     }
 
-    // ============================================================
-    // ЛИНИЯ МАРШРУТА И ОСТАНОВКИ
-    // ============================================================
     const routePassedLayer = L.polyline([], { color: '#9ca3af', weight: 5, opacity: 0.7, lineCap: 'round', lineJoin: 'round' });
     const routeRemainingLayer = L.polyline(route442, { color: BUS_COLOR, weight: 5, opacity: 0.85, lineCap: 'round', lineJoin: 'round' });
 
@@ -557,12 +535,8 @@
         return positionAtProgress(route442, cum442, bus.progress);
     }
 
-    // ============================================================
-    // НАПРАВЛЕНИЕ АВТОБУСА (угол в градусах)
-    // ============================================================
     function busBearing(bus) {
         let from, to;
-
         if (bus.phase === 'departing' || bus.phase === 'arriving') {
             from = [bus.lat, bus.lng];
             to = bus.transitTo;
@@ -581,7 +555,6 @@
         } else {
             return 0;
         }
-
         const dsx = to[1] - from[1];
         const dsy = -(to[0] - from[0]);
         if (dsx === 0 && dsy === 0) return 0;
@@ -590,6 +563,130 @@
 
     function angularDiff(a, b) {
         return Math.abs(((a - b) % 360 + 540) % 360 - 180);
+    }
+
+    // ============================================================
+    // ВЫЧИСЛЕНИЕ ПОЗИЦИИ ПО РАСПИСАНИЮ (живёт всегда)
+    // ============================================================
+    function elapsedToProgress(elapsedSec, direction) {
+        let timeLeft = elapsedSec;
+        let tripP = 0;
+        const stops = direction > 0 ? intermediateStops : [...intermediateStops].reverse();
+
+        const travelFromTo = (p1, p2) => {
+            if (direction > 0) return travelTimeSec(p1, p2);
+            return travelTimeSec(PATH_LENGTH - p2, PATH_LENGTH - p1);
+        };
+
+        const advance = (p, dt) => {
+            if (direction > 0) return computeTargetProgress({ progress: p, direction: 1 }, dt);
+            const endRoute = computeTargetProgress({ progress: PATH_LENGTH - p, direction: -1 }, dt);
+            return PATH_LENGTH - endRoute;
+        };
+
+        for (const stop of stops) {
+            const nextP = direction > 0 ? stop.s : (PATH_LENGTH - stop.s);
+            const needed = travelFromTo(tripP, nextP);
+            if (timeLeft < needed) return { tripP: advance(tripP, timeLeft), pauseRemaining: 0 };
+            timeLeft -= needed;
+            tripP = nextP;
+            if (timeLeft < CONFIG.STOP_PAUSE_SEC) return { tripP, pauseRemaining: CONFIG.STOP_PAUSE_SEC - timeLeft };
+            timeLeft -= CONFIG.STOP_PAUSE_SEC;
+        }
+        return { tripP: advance(tripP, timeLeft), pauseRemaining: 0 };
+    }
+
+    function getBusStateAt(bus, targetMs) {
+        const d = new Date(targetMs);
+        const todayStart = new Date(d);
+        todayStart.setHours(0, 0, 0, 0);
+        const dayStartMs = todayStart.getTime();
+        const DAY_MS = 86400000;
+        const TRANSIT = CONFIG.TRANSIT_SEC;
+        const TRIP = ONE_WAY_SEC;
+
+        const allDeps = [];
+        for (const dayOffset of [-1, 0, 1]) {
+            const base = dayStartMs + dayOffset * DAY_MS;
+            for (const t of bus.schedule.patp) {
+                const [h, m] = t.split(':').map(Number);
+                allDeps.push({ time: base + (h * 60 + m) * 60000, dir: 1 });
+            }
+            for (const t of bus.schedule.eman) {
+                const [h, m] = t.split(':').map(Number);
+                allDeps.push({ time: base + (h * 60 + m) * 60000, dir: -1 });
+            }
+        }
+        allDeps.sort((a, b) => a.time - b.time);
+
+        let lastDep = null, nextDep = null;
+        for (const dep of allDeps) {
+            if (dep.time <= targetMs) lastDep = dep;
+            else { nextDep = dep; break; }
+        }
+
+        if (!lastDep) {
+            const dir = nextDep ? nextDep.dir : 1;
+            const terminal = dir > 0 ? 'patp' : 'eman';
+            return {
+                phase: 'parked', direction: dir,
+                progress: terminal === 'patp' ? 0 : PATH_LENGTH,
+                pauseRemaining: 0, currentTerminal: terminal,
+                departureTime: nextDep ? nextDep.time : findDeparture(bus.schedule.patp, targetMs),
+                transitFrom: null, transitTo: null, transitRemaining: 0
+            };
+        }
+
+        const elapsedSec = (targetMs - lastDep.time) / 1000;
+
+        if (elapsedSec < TRANSIT) {
+            const terminal = lastDep.dir > 0 ? 'patp' : 'eman';
+            const parking = getParkingPosition({ currentTerminal: terminal, parkingIndex: bus.parkingIndex });
+            return {
+                phase: 'departing', direction: lastDep.dir,
+                progress: lastDep.dir > 0 ? 0 : PATH_LENGTH,
+                pauseRemaining: 0, currentTerminal: null, departureTime: null,
+                transitFrom: parking,
+                transitTo: lastDep.dir > 0 ? route442[0] : route442[route442.length - 1],
+                transitRemaining: TRANSIT - elapsedSec
+            };
+        }
+
+        if (elapsedSec < TRANSIT + TRIP) {
+            const driveElapsed = elapsedSec - TRANSIT;
+            const result = elapsedToProgress(driveElapsed, lastDep.dir);
+            const progress = lastDep.dir > 0 ? result.tripP : PATH_LENGTH - result.tripP;
+            return {
+                phase: 'driving', direction: lastDep.dir, progress,
+                pauseRemaining: result.pauseRemaining,
+                currentTerminal: null, departureTime: null,
+                transitFrom: null, transitTo: null, transitRemaining: 0
+            };
+        }
+
+        if (elapsedSec < TRANSIT + TRIP + TRANSIT) {
+            const arriveElapsed = elapsedSec - TRANSIT - TRIP;
+            const terminal = lastDep.dir > 0 ? 'eman' : 'patp';
+            const parking = getParkingPosition({ currentTerminal: terminal, parkingIndex: bus.parkingIndex });
+            return {
+                phase: 'arriving', direction: lastDep.dir,
+                progress: lastDep.dir > 0 ? PATH_LENGTH : 0,
+                pauseRemaining: 0, currentTerminal: terminal, departureTime: null,
+                transitFrom: lastDep.dir > 0 ? route442[route442.length - 1] : route442[0],
+                transitTo: parking,
+                transitRemaining: TRANSIT - arriveElapsed
+            };
+        }
+
+        const terminal = lastDep.dir > 0 ? 'eman' : 'patp';
+        return {
+            phase: 'parked', direction: terminal === 'patp' ? 1 : -1,
+            progress: terminal === 'patp' ? 0 : PATH_LENGTH,
+            pauseRemaining: 0, currentTerminal: terminal,
+            departureTime: nextDep ? nextDep.time : findDeparture(
+                terminal === 'patp' ? bus.schedule.patp : bus.schedule.eman, targetMs),
+            transitFrom: null, transitTo: null, transitRemaining: 0
+        };
     }
 
     // ============================================================
@@ -612,8 +709,13 @@
     });
 
     buses.forEach(bus => {
-        bus.departureTime = findDeparture(bus.schedule.patp, simTime);
-        console.log(`[${bus.name}] отправление с ПАТП: ${formatTime(bus.departureTime)} (место ${bus.parkingIndex+1})`);
+        const state = getBusStateAt(bus, simTime);
+        Object.assign(bus, state);
+        const pos = getBusPosition(bus);
+        bus.lat = pos[0];
+        bus.lng = pos[1];
+        const phaseRu = { parked: 'на конечной', departing: 'выезд', driving: 'на маршруте', arriving: 'заезд' }[state.phase];
+        console.log(`[${bus.name}] при загрузке: ${phaseRu} (progress=${state.progress.toFixed(1)}, место ${bus.parkingIndex+1})`);
     });
 
     function getDirectionName(bus) {
@@ -948,18 +1050,26 @@
     function updateModeButton() {
         const btn = document.getElementById('modeBtn'), txt = document.getElementById('modeBtnText');
         if (currentMode === 'real') { btn.classList.remove('demo'); txt.textContent = 'Реал'; }
-        else { btn.classList.add('demo'); txt.textContent = 'Демо 60x'; }
+        else { btn.classList.add('demo'); txt.textContent = `Демо ${CONFIG.DEMO_SPEED}x`; }
     }
 
     document.getElementById('modeBtn').addEventListener('click', () => {
         currentMode = currentMode === 'real' ? 'demo' : 'real';
-        if (currentMode === 'real') simTime = moscowNow();
-        buses.forEach(bus => {
-            if (bus.phase === 'parked') {
-                bus.departureTime = findDeparture(bus.currentTerminal === 'patp' ? bus.schedule.patp : bus.schedule.eman, simTime);
-            }
-        });
-        updateModeButton(); renderBusList(currentFilter);
+        if (currentMode === 'real') {
+            simTime = moscowNow();
+            buses.forEach(bus => {
+                const state = getBusStateAt(bus, simTime);
+                Object.assign(bus, state);
+                const pos = getBusPosition(bus);
+                bus.lat = pos[0];
+                bus.lng = pos[1];
+                updateBusIcon(bus);
+                updatePopup(bus);
+            });
+            updateNextStopHighlight();
+        }
+        updateModeButton();
+        renderBusList(currentFilter);
     });
 
     document.querySelectorAll('.route-btn').forEach(btn => {

@@ -15,7 +15,7 @@
             background-color: #f0f2f5;
             display: flex; flex-direction: column;
             height: 100vh;
-            height: 100dvh; /* динамическая высота — учитывает адресную строку */
+            height: 100dvh;
             overflow: hidden;
         }
         header { background: #ffffff; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.08); z-index: 1000; flex-shrink: 0; }
@@ -36,7 +36,6 @@
         .sidebar-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; }
         .sidebar-header h2 { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 12px; }
 
-        /* ── Выбор маршрута (выпадающий) ── */
         .route-picker { position: relative; }
         .route-picker-trigger {
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -64,7 +63,6 @@
         }
         .route-picker-panel.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-        /* ── Плоский список направлений ── */
         .rpp-item {
             display: flex; align-items: center; gap: 12px;
             padding: 12px 16px; cursor: pointer; transition: background 0.12s;
@@ -73,7 +71,6 @@
         .rpp-item:hover { background: #f3f4f6; }
         .rpp-item.selected { background: #eff6ff; color: #1d4ed8; font-weight: 600; }
 
-        /* Чекбокс слева */
         .rpp-checkbox {
             width: 20px; height: 20px; border-radius: 6px;
             border: 2px solid #d1d5db; background: #fff;
@@ -81,18 +78,11 @@
             flex-shrink: 0; transition: all 0.15s;
         }
         .rpp-item:hover .rpp-checkbox { border-color: #93c5fd; }
-        .rpp-item.selected .rpp-checkbox {
-            background: #2563eb; border-color: #2563eb;
-        }
-        .rpp-checkbox i {
-            color: #fff; font-size: 11px; opacity: 0;
-            transform: scale(0.5); transition: all 0.15s;
-        }
+        .rpp-item.selected .rpp-checkbox { background: #2563eb; border-color: #2563eb; }
+        .rpp-checkbox i { color: #fff; font-size: 11px; opacity: 0; transform: scale(0.5); transition: all 0.15s; }
         .rpp-item.selected .rpp-checkbox i { opacity: 1; transform: scale(1); }
-
         .rpp-item .rpp-dir { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* ── Футер панели с кнопками ── */
         .rpp-footer {
             display: flex; gap: 8px; padding: 10px 12px;
             border-top: 1px solid #f3f4f6; background: #fafafa;
@@ -104,22 +94,14 @@
             cursor: pointer; transition: all 0.15s; border: 1.5px solid transparent;
             display: flex; align-items: center; justify-content: center; gap: 6px;
         }
-        .rpp-btn-reset {
-            background: #fff; border-color: #e5e7eb; color: #6b7280;
-        }
+        .rpp-btn-reset { background: #fff; border-color: #e5e7eb; color: #6b7280; }
         .rpp-btn-reset:hover { border-color: #dc2626; color: #dc2626; background: #fef2f2; }
-        .rpp-btn-apply {
-            background: #2563eb; color: #fff;
-        }
+        .rpp-btn-apply { background: #2563eb; color: #fff; }
         .rpp-btn-apply:hover { background: #1d4ed8; }
-        .rpp-btn-apply:disabled {
-            background: #93c5fd; cursor: not-allowed;
-        }
+        .rpp-btn-apply:disabled { background: #93c5fd; cursor: not-allowed; }
 
-        /* ── Список автобусов скрыт ── */
         .bus-list { display: none !important; }
 
-        /* ── Сводка по выбранным направлениям ── */
         .route-summary {
             margin: 8px 16px 12px;
             padding: 10px 14px;
@@ -129,19 +111,10 @@
             display: none;
         }
         .route-summary.visible { display: block; }
-        .rs-count {
-            display: flex; align-items: baseline; gap: 8px;
-        }
-        .rs-number {
-            font-size: 28px; font-weight: 700; color: #1d4ed8;
-            line-height: 1; font-variant-numeric: tabular-nums;
-        }
-        .rs-label {
-            font-size: 13px; font-weight: 500; color: #1e40af;
-        }
-        .rs-label-title {
-            font-weight: 700;
-        }
+        .rs-count { display: flex; align-items: baseline; gap: 8px; }
+        .rs-number { font-size: 28px; font-weight: 700; color: #1d4ed8; line-height: 1; font-variant-numeric: tabular-nums; }
+        .rs-label { font-size: 13px; font-weight: 500; color: #1e40af; }
+        .rs-label-title { font-weight: 700; }
 
         #map { flex: 1; height: 100%; z-index: 1; background: #aad3df; min-height: 0; }
         @keyframes waiting-pulse { 0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.3); } 50% { box-shadow: 0 2px 18px rgba(0,0,0,0.7); } }
@@ -155,11 +128,7 @@
         .leaflet-popup-content { margin: 12px 14px; }
 
         @media (max-width: 768px) {
-            header {
-                padding: 8px 10px;
-                gap: 6px;
-                flex-wrap: nowrap;
-            }
+            header { padding: 8px 10px; gap: 6px; flex-wrap: nowrap; }
             .logo { font-size: 15px; gap: 6px; flex-shrink: 0; }
             .logo i { font-size: 18px; }
             .header-right { gap: 5px; flex-shrink: 1; min-width: 0; }
@@ -169,15 +138,8 @@
             .header-time i { font-size: 11px; }
             .header-status { padding: 4px 8px; font-size: 11px; gap: 4px; }
             .mode-btn span { display: none; }
-
             .main-container { flex-direction: column; }
-            .sidebar {
-                width: 100%;
-                height: auto;
-                flex-shrink: 0;
-                border-right: none;
-                border-bottom: 1px solid #e5e7eb;
-            }
+            .sidebar { width: 100%; height: auto; flex-shrink: 0; border-right: none; border-bottom: 1px solid #e5e7eb; }
             #map { height: auto; flex: 1; min-height: 0; }
         }
     </style>
@@ -236,98 +198,156 @@
         TRANSIT_SEC: 8,
     };
     const MOSCOW_OFFSET_HOURS = 3;
-    const BUS_COLOR = '#2563eb';
     const TRANSIT_COLOR = '#f59e0b';
     const PARKED_COLOR = '#94a3b8';
     let currentMode = CONFIG.MODE;
 
-    const SPEED_ZONE1_KMH = 45;
-    const SPEED_ZONE2_KMH = 65;
-
-    const PATP_PARKING = [
-        [70, 289], [70, 295], [70, 301],
-        [76, 289], [76, 295], [76, 301]
-    ];
-    const EMAN_PARKING = [
-        [144, 678], [144, 684], [144, 690],
-        [150, 678], [150, 684], [150, 690]
-    ];
-
-    const STOP_ROUTES = {
-        'ПАТП': ['442'], 'Универмаг': ['442'], 'Улица Победы': ['442'],
-        'ДК Октябрь': ['442'], 'Улица Набережная': ['442'], 'Речной порт': ['442'],
-        'Краснобор': ['442'], 'Пертуры': ['442'], 'Емшево': ['442'],
-        'Микряево': ['442'], 'Еманкаши': ['442']
+    // ============================================================
+    // ДАННЫЕ МАРШРУТОВ
+    // ============================================================
+    const ROUTES_DATA = {
+        '442': {
+            id: '442',
+            color: '#2563eb',
+            directionNames: { forward: 'Серпов → Еманкаши', backward: 'Еманкаши → Серпов' },
+            stops: [
+                { name: 'ПАТП', lat: 63, lng: 287 },
+                { name: 'Универмаг', lat: 50, lng: 305 },
+                { name: 'Улица Победы', lat: 26, lng: 312 },
+                { name: 'ДК Октябрь', lat: 26, lng: 345 },
+                { name: 'Улица Набережная', lat: 31, lng: 371 },
+                { name: 'Речной порт', lat: 63, lng: 378 },
+                { name: 'Краснобор', lat: 123, lng: 381 },
+                { name: 'Пертуры', lat: 196, lng: 414 },
+                { name: 'Емшево', lat: 151, lng: 515 },
+                { name: 'Микряево', lat: 165, lng: 636 },
+                { name: 'Еманкаши', lat: 137, lng: 684 }
+            ],
+            path: [
+                [63, 287], [63, 305], [27, 305], [27, 371], [44, 371],
+                [61, 378], [73, 378], [88, 372], [103, 356], [124, 350],
+                [124, 388], [167, 395], [194, 396], [210, 401], [183, 429],
+                [169, 458], [151, 507], [149, 533], [155, 546],
+                [156, 560],
+                [151, 573],
+                [137, 595], [140, 606], [165, 636], [145, 649], [128, 662],
+                [123, 673], [128, 683], [137, 684]
+            ],
+            oneWaySec: 30 * 60,
+            speed1Kmh: 45,
+            speed2Kmh: 65,
+            zoneSplitStop: 'Речной порт',
+            parkings: {
+                start: { name: 'ПАТП', spots: [[70,289], [70,295], [70,301], [76,289], [76,295], [76,301]] },
+                end: { name: 'Еманкаши', spots: [[144,678], [144,684], [144,690], [150,678], [150,684], [150,690]] }
+            },
+            loadRanges: {
+                morning_early: [50, 70],
+                morning_peak:  [70, 90],
+                day:           [50, 70],
+                evening_peak:  [70, 90],
+                evening:       [35, 45],
+                night:         [20, 35]
+            },
+            buses: [
+                { id: 'bus-442-1', name: 'Автобус №442-1', carrier: 'ИП Шарипов Вячеслав Газинурович', busClass: 'малый', accessible: false,
+                  schedule: {
+                      start: ['06:10','07:10','08:10','09:10','11:10','12:10','13:10','14:10','16:10','17:10','18:10','19:10'],
+                      end: ['06:40','07:40','08:40','09:40','11:40','12:40','13:40','14:40','16:40','17:40','18:40','19:40']
+                  } },
+                { id: 'bus-442-2', name: 'Автобус №442-2', carrier: 'ИП Геворгян Вардгес Альбертович', busClass: 'малый', accessible: false,
+                  schedule: {
+                      start: ['06:20','07:20','08:20','10:20','11:20','12:20','13:20','14:20','15:20','16:20','17:20','18:20','19:20'],
+                      end: ['06:50','07:50','08:50','10:50','11:50','12:50','13:50','14:50','15:50','16:50','17:50','18:50','19:50']
+                  } },
+                { id: 'bus-442-3', name: 'Автобус №442-3', carrier: 'ИП Геворгян Вардгес Альбертович', busClass: 'малый', accessible: false,
+                  schedule: {
+                      start: ['06:30','07:30','08:30','09:30','10:30','12:30','13:30','14:30','16:30','17:30','18:30','19:30','20:30'],
+                      end: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','17:00','18:00','19:00','20:00','21:00']
+                  } },
+                { id: 'bus-442-4', name: 'Автобус №442-4', carrier: 'ИП Геворгян Вардгес Альбертович', busClass: 'малый', accessible: false,
+                  schedule: {
+                      start: ['06:40','07:40','08:40','09:40','10:40','11:40','13:40','14:40','15:40','16:40','17:40','18:40','19:40','20:40'],
+                      end: ['07:10','08:10','09:10','10:10','11:10','12:10','14:10','15:10','16:10','17:10','18:10','19:10','20:10','21:10']
+                  } },
+                { id: 'bus-442-5', name: 'Автобус №442-5', carrier: 'ИП Шарипов Вячеслав Газинурович', busClass: 'малый', accessible: false,
+                  schedule: {
+                      start: ['06:50','07:50','08:50','09:50','11:50','12:50','13:50','15:50','16:50','17:50','18:50','19:50','20:50','21:50'],
+                      end: ['07:20','08:20','09:20','10:20','12:20','13:20','14:20','16:20','17:20','18:20','19:20','20:20','21:20','22:20']
+                  } },
+                { id: 'bus-442-6', name: 'Автобус №442-6', carrier: 'ИП Геворгян Вардгес Альбертович', busClass: 'малый', accessible: false,
+                  schedule: {
+                      start: ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','16:00','17:00','18:00','19:00','20:00','21:00'],
+                      end: ['07:30','08:30','09:30','10:30','11:30','12:30','13:30','14:30','16:30','17:30','18:30','19:30','20:30','21:30']
+                  } }
+            ]
+        },
+        '211': {
+            id: '211',
+            color: '#10b981',
+            directionNames: { forward: 'Мораши → Москагазы', backward: 'Москагазы → Мораши' },
+            stops: [
+                { name: 'Автостанция Мораши', lat: 958, lng: 383 },
+                { name: 'АЗС', lat: 952, lng: 344 },
+                { name: 'МКЗ', lat: 921, lng: 269 },
+                { name: 'Падасы 1', lat: 817, lng: 243 },
+                { name: 'Падасы 2', lat: 804, lng: 252 },
+                { name: 'Падасы 3', lat: 764, lng: 249 },
+                { name: 'Москагазы', lat: 611, lng: 202 }
+            ],
+            path: [
+                [958,383],
+                [957,373], [952,370],
+                [952,344],
+                [953,317], [949,302], [931,279],
+                [921,269],
+                [905,259], [833,243],
+                [817,243], [804,252],
+                [789,260], [776,258],
+                [764,249],
+                [708,217], [693,212], [651,217], [636,215],
+                [611,202]
+            ],
+            oneWaySec: 15 * 60,
+            speed1Kmh: 50,
+            speed2Kmh: 50,
+            zoneSplitStop: null,
+            parkings: {
+                start: { name: 'Мораши', spots: [[946,343], [943,350]] },
+                end: { name: 'Москагазы', spots: [[605,208], [596,203]] }
+            },
+            loadRanges: {
+                morning_early: [40, 60],
+                morning_peak:  [60, 80],
+                day:           [40, 60],
+                evening_peak:  [60, 80],
+                evening:       [35, 45],
+                night:         [20, 35]
+            },
+            buses: [
+                { id: 'bus-211-1', name: 'Автобус №211-1', carrier: 'ИП Хабибуллин Мурад Илгарович', busClass: 'микроавтобус', accessible: false,
+                  schedule: {
+                      start: ['06:30','07:10','07:50','08:30','09:10','09:50','10:45','11:25','12:05','12:45','13:25','14:05','14:45','15:40','16:20','17:30','18:10','18:50','19:45','20:25'],
+                      end: ['06:50','07:30','08:10','08:50','09:30','10:10','11:05','11:45','12:25','13:05','13:45','14:25','15:05','16:00','16:40','17:50','18:30','19:10','20:05','20:45']
+                  } },
+                { id: 'bus-211-2', name: 'Автобус №211-2', carrier: 'ИП Хабибуллин Мурад Илгарович', busClass: 'микроавтобус', accessible: false,
+                  schedule: {
+                      start: ['06:50','07:30','08:10','08:50','09:30','10:10','11:05','11:45','12:25','13:05','13:45','14:25','15:05','16:00','17:10','17:50','18:30','19:10','20:05','20:45'],
+                      end: ['07:10','07:50','08:30','09:10','09:50','10:30','12:05','12:45','13:25','14:05','14:45','15:25','16:20','17:30','18:10','18:50','19:30','20:25','21:05']
+                  } }
+            ]
+        }
     };
 
-    const BUSES_CONFIG = [
-        { id: 'bus-1', name: 'Автобус №442-1', carrier: 'ИП Шарипов Вячеслав Газинурович', busClass: 'малый', accessible: false,
-          schedule: {
-              patp: ['06:10','07:10','08:10','09:10','11:10','12:10','13:10','14:10','16:10','17:10','18:10','19:10'],
-              eman: ['06:40','07:40','08:40','09:40','11:40','12:40','13:40','14:40','16:40','17:40','18:40','19:40']
-          } },
-        { id: 'bus-2', name: 'Автобус №442-2', carrier: 'ИП Геворгян Вардгес Альбертович', busClass: 'малый', accessible: false,
-          schedule: {
-              patp: ['06:20','07:20','08:20','10:20','11:20','12:20','13:20','14:20','15:20','16:20','17:20','18:20','19:20'],
-              eman: ['06:50','07:50','08:50','10:50','11:50','12:50','13:50','14:50','15:50','16:50','17:50','18:50','19:50']
-          } },
-        { id: 'bus-3', name: 'Автобус №442-3', carrier: 'ИП Геворгян Вардгес Альбертович', busClass: 'малый', accessible: false,
-          schedule: {
-              patp: ['06:30','07:30','08:30','09:30','10:30','12:30','13:30','14:30','16:30','17:30','18:30','19:30','20:30'],
-              eman: ['07:00','08:00','09:00','10:00','11:00','13:00','14:00','15:00','17:00','18:00','19:00','20:00','21:00']
-          } },
-        { id: 'bus-4', name: 'Автобус №442-4', carrier: 'ИП Геворгян Вардгес Альбертович', busClass: 'малый', accessible: false,
-          schedule: {
-              patp: ['06:40','07:40','08:40','09:40','10:40','11:40','13:40','14:40','15:40','16:40','17:40','18:40','19:40','20:40'],
-              eman: ['07:10','08:10','09:10','10:10','11:10','12:10','14:10','15:10','16:10','17:10','18:10','19:10','20:10','21:10']
-          } },
-        { id: 'bus-5', name: 'Автобус №442-5', carrier: 'ИП Шарипов Вячеслав Газинурович', busClass: 'малый', accessible: false,
-          schedule: {
-              patp: ['06:50','07:50','08:50','09:50','11:50','12:50','13:50','15:50','16:50','17:50','18:50','19:50','20:50','21:50'],
-              eman: ['07:20','08:20','09:20','10:20','12:20','13:20','14:20','16:20','17:20','18:20','19:20','20:20','21:20','22:20']
-          } },
-        { id: 'bus-6', name: 'Автобус №442-6', carrier: 'ИП Геворгян Вардгес Альбертович', busClass: 'малый', accessible: false,
-          schedule: {
-              patp: ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','16:00','17:00','18:00','19:00','20:00','21:00'],
-              eman: ['07:30','08:30','09:30','10:30','11:30','12:30','13:30','14:30','16:30','17:30','18:30','19:30','20:30','21:30']
-          } }
-    ];
+    const ROUTES = {};
 
+    // ============================================================
+    // КАРТА
+    // ============================================================
     const map = L.map('map', { crs: L.CRS.Simple, minZoom: -1, maxZoom: 2 });
     const bounds = [[0, 0], [1000, 1000]];
     L.imageOverlay('map.png', bounds).addTo(map);
     map.fitBounds(bounds);
-
-    const route442 = [
-        [63, 287], [63, 305], [27, 305], [27, 371], [44, 371],
-        [61, 378], [73, 378], [88, 372], [103, 356], [124, 350],
-        [124, 388], [167, 395], [194, 396], [210, 401], [183, 429],
-        [169, 458], [151, 507], [149, 533], [155, 546],
-        [156, 560],
-        [151, 573],
-        [137, 595], [140, 606], [165, 636], [145, 649], [128, 662],
-        [123, 673], [128, 683], [137, 684]
-    ];
-
-    const cum442 = [0];
-    for (let i = 1; i < route442.length; i++) {
-        cum442.push(cum442[i-1] + Math.hypot(route442[i][0]-route442[i-1][0], route442[i][1]-route442[i-1][1]));
-    }
-    const PATH_LENGTH = cum442[cum442.length - 1];
-
-    const stops442 = [
-        { name: 'ПАТП', lat: 63, lng: 287 },
-        { name: 'Универмаг', lat: 50, lng: 305 },
-        { name: 'Улица Победы', lat: 26, lng: 312 },
-        { name: 'ДК Октябрь', lat: 26, lng: 345 },
-        { name: 'Улица Набережная', lat: 31, lng: 371 },
-        { name: 'Речной порт', lat: 63, lng: 378 },
-        { name: 'Краснобор', lat: 123, lng: 381 },
-        { name: 'Пертуры', lat: 196, lng: 414 },
-        { name: 'Емшево', lat: 151, lng: 515 },
-        { name: 'Микряево', lat: 165, lng: 636 },
-        { name: 'Еманкаши', lat: 137, lng: 684 }
-    ];
 
     function projectStopOnPath(stop, path, cum) {
         let bestDist = Infinity, bestS = 0;
@@ -343,60 +363,69 @@
         return bestS;
     }
 
-    const stopsWithS = stops442.map(s => ({ ...s, s: projectStopOnPath(s, route442, cum442) }));
-    const intermediateStops = stopsWithS.slice(1, -1);
+    function initRoute(route) {
+        const cum = [0];
+        for (let i = 1; i < route.path.length; i++) {
+            cum.push(cum[i-1] + Math.hypot(route.path[i][0]-route.path[i-1][0], route.path[i][1]-route.path[i-1][1]));
+        }
+        route.cumPath = cum;
+        route.pathLength = cum[cum.length-1];
+        route.stopsWithS = route.stops.map(s => ({ ...s, s: projectStopOnPath(s, route.path, cum) }));
+        route.intermediateStops = route.stopsWithS.slice(1, -1);
 
-    const S_PORT = stopsWithS.find(s => s.name === 'Речной порт').s;
+        if (route.zoneSplitStop) {
+            const splitStop = route.stopsWithS.find(s => s.name === route.zoneSplitStop);
+            route.sPort = splitStop ? splitStop.s : 0;
+        } else {
+            route.sPort = 0;
+        }
 
-    const ONE_WAY_SEC = 30 * 60;
-    const PAUSES_SEC_TOTAL = intermediateStops.length * CONFIG.STOP_PAUSE_SEC;
-    const MOVE_SEC_TOTAL = ONE_WAY_SEC - PAUSES_SEC_TOTAL;
+        const pausesTotal = route.intermediateStops.length * CONFIG.STOP_PAUSE_SEC;
+        const moveSecTotal = route.oneWaySec - pausesTotal;
 
-    const V1_MPS = SPEED_ZONE1_KMH / 3.6;
-    const V2_MPS = SPEED_ZONE2_KMH / 3.6;
-    const L1 = S_PORT;
-    const L2 = PATH_LENGTH - S_PORT;
+        const v1mps = route.speed1Kmh / 3.6;
+        const v2mps = route.speed2Kmh / 3.6;
+        const l1 = route.sPort;
+        const l2 = route.pathLength - route.sPort;
 
-    const MAP_METERS_PER_UNIT = MOVE_SEC_TOTAL / (L1 / V1_MPS + L2 / V2_MPS);
-    const V1 = V1_MPS / MAP_METERS_PER_UNIT;
-    const V2 = V2_MPS / MAP_METERS_PER_UNIT;
+        route.MAP_METERS_PER_UNIT = moveSecTotal / (l1 / v1mps + l2 / v2mps);
+        route.V1 = v1mps / route.MAP_METERS_PER_UNIT;
+        route.V2 = v2mps / route.MAP_METERS_PER_UNIT;
 
-    console.log(`[442] S речного порта: ${S_PORT.toFixed(1)} ед.`);
-    console.log(`[442] Маршрут: ${(PATH_LENGTH * MAP_METERS_PER_UNIT / 1000).toFixed(2)} км (масштаб ${MAP_METERS_PER_UNIT.toFixed(2)} м/ед.)`);
-    console.log(`[442] Время движения: ${MOVE_SEC_TOTAL} с, пауз: ${PAUSES_SEC_TOTAL} с → ${(MOVE_SEC_TOTAL + PAUSES_SEC_TOTAL) / 60} мин ✓`);
-    console.log(`[442] Демо-режим: x${CONFIG.DEMO_SPEED}`);
+        console.log(`[${route.id}] путь ${route.pathLength.toFixed(1)} ед., масштаб ${route.MAP_METERS_PER_UNIT.toFixed(2)} м/ед.`);
+    }
 
-    function speedAt(s) { return s < S_PORT ? V1 : V2; }
+    function speedAt(route, s) { return s < route.sPort ? route.V1 : route.V2; }
 
-    function travelTimeSec(s1, s2) {
+    function travelTimeSec(route, s1, s2) {
         if (s1 >= s2) return 0;
         let t = 0;
-        if (s1 < S_PORT) {
-            const to = Math.min(s2, S_PORT);
-            t += (to - s1) / V1;
+        if (s1 < route.sPort) {
+            const to = Math.min(s2, route.sPort);
+            t += (to - s1) / route.V1;
         }
-        if (s2 > S_PORT) {
-            const from = Math.max(s1, S_PORT);
-            t += (s2 - from) / V2;
+        if (s2 > route.sPort) {
+            const from = Math.max(s1, route.sPort);
+            t += (s2 - from) / route.V2;
         }
         return t;
     }
 
-    function computeTargetProgress(bus, dt_sim) {
+    function computeTargetProgress(bus, route, dt_sim) {
         let timeLeft = dt_sim;
         let p = bus.progress;
         while (timeLeft > 1e-9) {
-            const v = speedAt(p);
+            const v = speedAt(route, p);
             const dist = v * timeLeft;
             const pNew = p + bus.direction * dist;
-            if (bus.direction > 0 && p < S_PORT && pNew > S_PORT) {
-                timeLeft -= (S_PORT - p) / v;
-                p = S_PORT;
+            if (bus.direction > 0 && p < route.sPort && pNew > route.sPort) {
+                timeLeft -= (route.sPort - p) / v;
+                p = route.sPort;
                 continue;
             }
-            if (bus.direction < 0 && p > S_PORT && pNew < S_PORT) {
-                timeLeft -= (p - S_PORT) / v;
-                p = S_PORT;
+            if (bus.direction < 0 && p > route.sPort && pNew < route.sPort) {
+                timeLeft -= (p - route.sPort) / v;
+                p = route.sPort;
                 continue;
             }
             p = pNew;
@@ -427,48 +456,103 @@
 
     function easeInOutCubic(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
 
-    const parkingMarkers = [];
-    PATP_PARKING.forEach((p, i) => {
-        parkingMarkers.push(L.circleMarker(p, {
-            radius: 4, color: '#64748b', fillColor: '#94a3b8',
-            fillOpacity: 0.4, weight: 1
-        }).bindTooltip(`ПАТП · место ${i+1}`, { direction: 'top', offset: [0,-6], className: 'parking-tooltip' }));
-    });
-    EMAN_PARKING.forEach((p, i) => {
-        parkingMarkers.push(L.circleMarker(p, {
-            radius: 4, color: '#64748b', fillColor: '#94a3b8',
-            fillOpacity: 0.4, weight: 1
-        }).bindTooltip(`Еманкаши · место ${i+1}`, { direction: 'top', offset: [0,-6], className: 'parking-tooltip' }));
-    });
+    // ============================================================
+    // ИНИЦИАЛИЗАЦИЯ МАРШРУТОВ (слои)
+    // ============================================================
+    for (const routeId in ROUTES_DATA) {
+        const route = ROUTES_DATA[routeId];
+        ROUTES[routeId] = route;
+        initRoute(route);
+
+        route.passedLayer = L.polyline([], { color: '#9ca3af', weight: 5, opacity: 0.7, lineCap: 'round', lineJoin: 'round' });
+        route.remainingLayer = L.polyline(route.path, { color: route.color, weight: 5, opacity: 0.85, lineCap: 'round', lineJoin: 'round' });
+
+        route.stopMarkers = route.stopsWithS.map((stop, i) => {
+            const isEndpoint = i === 0 || i === route.stopsWithS.length - 1;
+            const marker = L.circleMarker([stop.lat, stop.lng], {
+                radius: isEndpoint ? 8 : 6,
+                color: route.color,
+                fillColor: isEndpoint ? route.color : '#ffffff',
+                fillOpacity: 1, weight: 2,
+                bubblingMouseEvents: false
+            });
+            marker.bindTooltip(stop.name, { permanent: isEndpoint, direction: 'top', offset: [0,-8], className: 'stop-tooltip' });
+            marker.bindPopup(() => buildStopPopup(stop, route), { maxWidth: 340 });
+            return marker;
+        });
+
+        route.parkingMarkers = [];
+        route.parkings.start.spots.forEach((p, i) => {
+            route.parkingMarkers.push(L.circleMarker(p, {
+                radius: 4, color: '#64748b', fillColor: '#94a3b8',
+                fillOpacity: 0.4, weight: 1
+            }).bindTooltip(`${route.parkings.start.name} · место ${i+1}`, { direction: 'top', offset: [0,-6], className: 'parking-tooltip' }));
+        });
+        route.parkings.end.spots.forEach((p, i) => {
+            route.parkingMarkers.push(L.circleMarker(p, {
+                radius: 4, color: '#64748b', fillColor: '#94a3b8',
+                fillOpacity: 0.4, weight: 1
+            }).bindTooltip(`${route.parkings.end.name} · место ${i+1}`, { direction: 'top', offset: [0,-6], className: 'parking-tooltip' }));
+        });
+    }
+
+    // ============================================================
+    // АВТОБУСЫ
+    // ============================================================
+    let activeBusId = 'bus-442-2';
+    let buses = [];
+
+    for (const routeId in ROUTES) {
+        const route = ROUTES[routeId];
+        route.buses.forEach((cfg, i) => {
+            const startSpot = route.parkings.start.spots[i % route.parkings.start.spots.length];
+            buses.push({
+                ...cfg,
+                routeId: route.id,
+                parkingIndex: i,
+                progress: 0, direction: 1, pauseRemaining: 0,
+                phase: 'parked',
+                currentTerminal: 'start',
+                departureTime: null,
+                transitFrom: null, transitTo: null, transitRemaining: 0,
+                lat: startSpot[0], lng: startSpot[1],
+                marker: null,
+                _lastBearing: undefined
+            });
+        });
+    }
 
     function getParkingPosition(bus) {
-        const spots = bus.currentTerminal === 'patp' ? PATP_PARKING : EMAN_PARKING;
+        const route = ROUTES[bus.routeId];
+        const spots = bus.currentTerminal === 'start' ? route.parkings.start.spots : route.parkings.end.spots;
         return spots[bus.parkingIndex % spots.length];
     }
 
     function busSpeedLabel(bus) {
+        const route = ROUTES[bus.routeId];
         if (bus.phase === 'parked') return { text: 'ожидание', kmh: 0 };
         if (bus.phase === 'departing') return { text: 'выезд с парковки', kmh: 0 };
         if (bus.phase === 'arriving') return { text: 'заезд на парковку', kmh: 0 };
         if (bus.pauseRemaining > 0) return { text: 'остановка', kmh: 0 };
-        const kmh = bus.progress < S_PORT ? SPEED_ZONE1_KMH : SPEED_ZONE2_KMH;
+        const kmh = bus.progress < route.sPort ? route.speed1Kmh : route.speed2Kmh;
         return { text: `~${kmh} км/ч`, kmh };
     }
 
-    function countPausesBetween(s1, s2) {
+    function countPausesBetween(route, s1, s2) {
         if (s1 > s2) [s1, s2] = [s2, s1];
         let count = 0;
-        for (const stop of intermediateStops) {
+        for (const stop of route.intermediateStops) {
             if (stop.s > s1 + 0.5 && stop.s < s2 - 0.5) count++;
         }
         return count;
     }
 
     function etaToStop(bus, targetS, direction) {
+        const route = ROUTES[bus.routeId];
         let busDir = null, waitSec = 0;
 
         if (bus.phase === 'parked' || bus.phase === 'arriving') {
-            busDir = bus.currentTerminal === 'patp' ? 1 : -1;
+            busDir = bus.currentTerminal === 'start' ? 1 : -1;
             waitSec = Math.max(0, (bus.departureTime - simTime) / 1000) + CONFIG.TRANSIT_SEC;
         } else if (bus.phase === 'departing') {
             busDir = bus.direction;
@@ -477,12 +561,12 @@
             if (bus.direction !== direction) return null;
             const pauseSec = bus.pauseRemaining || 0;
             if (direction === 1 && bus.progress < targetS - 0.5) {
-                const pauses = countPausesBetween(bus.progress, targetS);
-                return pauseSec + travelTimeSec(bus.progress, targetS) + pauses * CONFIG.STOP_PAUSE_SEC;
+                const pauses = countPausesBetween(route, bus.progress, targetS);
+                return pauseSec + travelTimeSec(route, bus.progress, targetS) + pauses * CONFIG.STOP_PAUSE_SEC;
             }
             if (direction === -1 && bus.progress > targetS + 0.5) {
-                const pauses = countPausesBetween(targetS, bus.progress);
-                return pauseSec + travelTimeSec(targetS, bus.progress) + pauses * CONFIG.STOP_PAUSE_SEC;
+                const pauses = countPausesBetween(route, targetS, bus.progress);
+                return pauseSec + travelTimeSec(route, targetS, bus.progress) + pauses * CONFIG.STOP_PAUSE_SEC;
             }
             return null;
         } else {
@@ -493,11 +577,11 @@
 
         let travelT, pauses;
         if (direction === 1) {
-            travelT = travelTimeSec(0, targetS);
-            pauses = countPausesBetween(0, targetS);
+            travelT = travelTimeSec(route, 0, targetS);
+            pauses = countPausesBetween(route, 0, targetS);
         } else {
-            travelT = travelTimeSec(targetS, PATH_LENGTH);
-            pauses = countPausesBetween(targetS, PATH_LENGTH);
+            travelT = travelTimeSec(route, targetS, route.pathLength);
+            pauses = countPausesBetween(route, targetS, route.pathLength);
         }
         return waitSec + travelT + pauses * CONFIG.STOP_PAUSE_SEC;
     }
@@ -510,8 +594,9 @@
 
     function getNextStop(bus) {
         if (bus.phase !== 'driving') return null;
+        const route = ROUTES[bus.routeId];
         const dir = bus.direction;
-        const ordered = dir > 0 ? stopsWithS : [...stopsWithS].reverse();
+        const ordered = dir > 0 ? route.stopsWithS : [...route.stopsWithS].reverse();
         for (const stop of ordered) {
             if (dir > 0 && stop.s <= bus.progress + 0.5) continue;
             if (dir < 0 && stop.s >= bus.progress - 0.5) continue;
@@ -522,35 +607,57 @@
     }
 
     // ============================================================
-    // ЗАПОЛНЕННОСТЬ АВТОБУСА — интервалы по времени суток
+    // ЗАПОЛНЕННОСТЬ (по маршруту + плавное набивание по пути)
     // ============================================================
     function seededNoise(seed, x) {
         const s = Math.sin(seed * 12.9898 + x * 78.233) * 43758.5453;
         return s - Math.floor(s);
     }
 
-    function getLoadRange(ms) {
+    function getLoadRange(route, ms) {
         const d = new Date(ms);
         const hm = d.getHours() * 60 + d.getMinutes();
         const at = (h, m) => h * 60 + m;
+        const r = route.loadRanges;
 
-        if (hm >= at(6, 30) && hm < at(8, 30))   return [80, 100];
-        if (hm >= at(8, 30) && hm < at(15, 0))   return [55, 80];
-        if (hm >= at(15, 0) && hm < at(18, 30))  return [80, 100];
-        if (hm >= at(18, 30) && hm < at(22, 30)) return [25, 50];
-        return [5, 25];
+        if (hm >= at(21, 30) || hm < at(6, 0))    return r.night;
+        if (hm >= at(6, 0) && hm < at(6, 30))     return r.morning_early;
+        if (hm >= at(6, 30) && hm < at(9, 0))     return r.morning_peak;
+        if (hm >= at(9, 0) && hm < at(16, 0))     return r.day;
+        if (hm >= at(16, 0) && hm < at(19, 0))    return r.evening_peak;
+        if (hm >= at(19, 0) && hm < at(21, 30))   return r.evening;
+        return r.night;
+    }
+
+    // Коэффициент набивания по прогрессу: 0 → пустой, 0.5 → полный, 1 → пустеет
+    function progressLoadFactor(ratio) {
+        if (ratio <= 0) return 0.15;
+        if (ratio >= 1) return 0.15;
+        const s = Math.sin(ratio * Math.PI);
+        return 0.15 + 0.85 * Math.pow(s, 2.0);
     }
 
     function getBusLoad(bus) {
         if (bus.phase === 'parked') return null;
 
-        const [minPct, maxPct] = getLoadRange(simTime);
+        const route = ROUTES[bus.routeId];
+        const [minPct, maxPct] = getLoadRange(route, simTime);
 
         const seed = bus.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
         const slot = Math.floor(simTime / (3 * 60 * 1000));
         const rnd = seededNoise(seed * 31 + slot, 1);
+        const targetPct = minPct + (maxPct - minPct) * rnd;
 
-        const pct = Math.round(minPct + (maxPct - minPct) * rnd);
+        let ratio;
+        if (bus.phase === 'departing') ratio = 0;
+        else if (bus.phase === 'arriving') ratio = 1;
+        else {
+            const raw = bus.progress / route.pathLength;
+            ratio = bus.direction > 0 ? raw : 1 - raw;
+        }
+
+        const factor = progressLoadFactor(ratio);
+        const pct = Math.round(targetPct * factor);
         return Math.max(1, Math.min(100, pct));
     }
 
@@ -568,12 +675,12 @@
         return 'свободно';
     }
 
-    function buildStopPopup(stop) {
-        const routes = STOP_ROUTES[stop.name] || ['442'];
-        const zoneKmh = stop.s <= S_PORT ? SPEED_ZONE1_KMH : SPEED_ZONE2_KMH;
+    function buildStopPopup(stop, route) {
+        const zoneKmh = stop.s <= route.sPort ? route.speed1Kmh : route.speed2Kmh;
         const arrivals = [];
 
         for (const bus of buses) {
+            if (bus.routeId !== route.id) continue;
             let bestSec = null;
             for (const dir of [1, -1]) {
                 const sec = etaToStop(bus, stop.s, dir);
@@ -587,9 +694,7 @@
         html += `<div style="font-weight: 700; font-size: 14px; color: #1f2937; margin-bottom: 4px;">🚏 ${stop.name}</div>`;
         html += `<div style="font-size: 11px; color: #9ca3af; margin-bottom: 8px;">зона: ~${zoneKmh} км/ч</div>`;
         html += `<div style="margin-bottom: 10px;">`;
-        routes.forEach(r => {
-            html += `<span style="display: inline-block; background: #2563eb; color: white; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; margin-right: 4px;">${r}</span>`;
-        });
+        html += `<span style="display: inline-block; background: ${route.color}; color: white; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; margin-right: 4px;">${route.id}</span>`;
         html += `</div>`;
 
         if (arrivals.length === 0) {
@@ -602,8 +707,8 @@
                 const spdColor = spd.kmh > 0 ? '#6b7280' : '#94a3b8';
                 html += `<div style="padding: 6px 0; border-top: 1px solid #f0f0f0;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                        <span style="color: #1f2937; font-weight: 500;"><i class="fas fa-bus" style="color: #2563eb; margin-right: 6px; font-size: 11px;"></i>${busNum}</span>
-                        <span style="color: #2563eb; font-weight: 700;">${formatEta(sec)}</span>
+                        <span style="color: #1f2937; font-weight: 500;"><i class="fas fa-bus" style="color: ${route.color}; margin-right: 6px; font-size: 11px;"></i>${busNum}</span>
+                        <span style="color: ${route.color}; font-weight: 700;">${formatEta(sec)}</span>
                     </div>
                     <div style="font-size: 11px; color: ${spdColor}; margin-top: 2px; margin-left: 17px;">
                         <i class="fas fa-tachometer-alt" style="font-size: 10px; margin-right: 4px;"></i>${spd.text}
@@ -615,221 +720,11 @@
         return html;
     }
 
-    const routePassedLayer = L.polyline([], { color: '#9ca3af', weight: 5, opacity: 0.7, lineCap: 'round', lineJoin: 'round' });
-    const routeRemainingLayer = L.polyline(route442, { color: BUS_COLOR, weight: 5, opacity: 0.85, lineCap: 'round', lineJoin: 'round' });
-
-    const stopMarkers = stopsWithS.map((stop, i) => {
-        const isEndpoint = i === 0 || i === stopsWithS.length - 1;
-        const marker = L.circleMarker([stop.lat, stop.lng], {
-            radius: isEndpoint ? 8 : 6,
-            color: '#1e40af',
-            fillColor: isEndpoint ? BUS_COLOR : '#ffffff',
-            fillOpacity: 1, weight: 2,
-            bubblingMouseEvents: false
-        });
-        marker.bindTooltip(stop.name, { permanent: isEndpoint, direction: 'top', offset: [0,-8], className: 'stop-tooltip' });
-        marker.bindPopup(() => buildStopPopup(stop), { maxWidth: 340 });
-        return marker;
-    });
-
     // ============================================================
-    // ВЫПАДАЮЩИЙ ВЫБОР МАРШРУТА + НАПРАВЛЕНИЯ (мультивыбор)
+    // ПОЗИЦИЯ / НАПРАВЛЕНИЕ
     // ============================================================
-    let currentFilter = 'all';
-    let currentDirection = [];
-
-    const picker = document.getElementById('routePicker');
-    const pickerTrigger = document.getElementById('routePickerTrigger');
-    const pickerPanel = document.getElementById('routePickerPanel');
-    const pickerLabel = document.getElementById('routePickerLabel');
-    const pickerClear = document.getElementById('routePickerClear');
-
-    function getBusDirection(bus) {
-        if (bus.phase === 'parked' || bus.phase === 'arriving') {
-            return bus.currentTerminal === 'patp' ? 1 : -1;
-        }
-        return bus.direction;
-    }
-
-    function updateRouteSummary() {
-        const summary = document.getElementById('routeSummary');
-        const numEl = document.getElementById('rsNumber');
-        const labelEl = document.getElementById('rsLabel');
-
-        if (!summary) return;
-
-        if (currentDirection.length === 0) {
-            summary.classList.remove('visible');
-            return;
-        }
-
-        let count = 0;
-        buses.forEach(bus => {
-            const dir = getBusDirection(bus);
-            if (currentDirection.includes(dir)) count++;
-        });
-
-        const n = count;
-        const mod10 = n % 10, mod100 = n % 100;
-        let word = 'автобусов';
-        if (mod10 === 1 && mod100 !== 11) word = 'автобус';
-        else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) word = 'автобуса';
-
-        numEl.textContent = count;
-        labelEl.textContent = word;
-        summary.classList.add('visible');
-    }
-
-    function buildRoutePicker() {
-        const directions = [
-            { dir: 1,  text: '442 (Серпов → Еманкаши)' },
-            { dir: -1, text: '442 (Еманкаши → Серпов)' }
-        ];
-
-        let draftDirs = [...currentDirection];
-
-        pickerPanel.innerHTML = directions.map(d => {
-            const selected = draftDirs.includes(d.dir);
-            return `<div class="rpp-item${selected ? ' selected' : ''}" data-dir="${d.dir}">
-                <span class="rpp-checkbox"><i class="fas fa-check"></i></span>
-                <span class="rpp-dir">${d.text}</span>
-            </div>`;
-        }).join('') + `
-            <div class="rpp-footer">
-                <button class="rpp-btn rpp-btn-reset" id="rppReset">
-                    <i class="fas fa-xmark"></i>Сбросить
-                </button>
-                <button class="rpp-btn rpp-btn-apply" id="rppApply" ${draftDirs.length === 0 ? 'disabled' : ''}>
-                    <i class="fas fa-check"></i>Показать
-                </button>
-            </div>`;
-
-        const updateDraftUI = () => {
-            pickerPanel.querySelectorAll('.rpp-item').forEach(it => {
-                it.classList.toggle('selected', draftDirs.includes(Number(it.dataset.dir)));
-            });
-            document.getElementById('rppApply').disabled = (draftDirs.length === 0);
-        };
-
-        pickerPanel.querySelectorAll('.rpp-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const d = Number(item.dataset.dir);
-                const idx = draftDirs.indexOf(d);
-                if (idx >= 0) draftDirs.splice(idx, 1);
-                else draftDirs.push(d);
-                updateDraftUI();
-            });
-        });
-
-        document.getElementById('rppReset').addEventListener('click', () => {
-            draftDirs = [];
-            updateDraftUI();
-
-            currentDirection = [];
-            currentFilter = 'all';
-            applyPickerState();
-            renderBusList(currentFilter);
-            updateRouteVisibility();
-        });
-
-        document.getElementById('rppApply').addEventListener('click', () => {
-            if (draftDirs.length === 0) return;
-            currentDirection = [...draftDirs];
-            currentFilter = '442';
-            closePicker();
-            applyPickerState();
-            renderBusList(currentFilter);
-            updateRouteVisibility();
-        });
-    }
-
-    function applyPickerState() {
-        if (currentDirection.length === 0) {
-            pickerLabel.textContent = 'Выберите маршрут';
-            pickerClear.style.display = 'none';
-            pickerTrigger.classList.remove('open');
-        } else if (currentDirection.length === 2) {
-            pickerLabel.textContent = 'Маршрут 442 · оба направления';
-            pickerClear.style.display = 'inline-flex';
-        } else {
-            const dirText = currentDirection[0] === 1 ? 'Серпов → Еманкаши' : 'Еманкаши → Серпов';
-            pickerLabel.textContent = `Маршрут 442 · ${dirText}`;
-            pickerClear.style.display = 'inline-flex';
-        }
-    }
-
-    function openPicker() { pickerPanel.classList.add('open'); pickerTrigger.classList.add('open'); }
-    function closePicker() { pickerPanel.classList.remove('open'); pickerTrigger.classList.remove('open'); }
-    function togglePicker() { pickerPanel.classList.contains('open') ? closePicker() : (buildRoutePicker(), openPicker()); }
-
-    pickerTrigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (e.target.closest('#routePickerClear')) return;
-        togglePicker();
-    });
-
-    pickerClear.addEventListener('click', (e) => {
-        e.stopPropagation();
-        currentDirection = [];
-        currentFilter = 'all';
-        closePicker();
-        applyPickerState();
-        renderBusList(currentFilter);
-        updateRouteVisibility();
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!picker.contains(e.target)) closePicker();
-    });
-
-    setInterval(() => {
-        if (pickerPanel.classList.contains('open')) buildRoutePicker();
-    }, 5000);
-
-    function updateRouteVisibility() {
-        updateRouteSummary();
-        const visible = currentDirection.length > 0;
-
-        [routePassedLayer, routeRemainingLayer, ...stopMarkers, ...parkingMarkers].forEach(layer => {
-            if (visible && !map.hasLayer(layer)) layer.addTo(map);
-            else if (!visible && map.hasLayer(layer)) map.removeLayer(layer);
-        });
-
-        buses.forEach(bus => {
-            const dir = getBusDirection(bus);
-            const showBus = visible && currentDirection.includes(dir);
-
-            if (showBus) {
-                if (!map.hasLayer(bus.marker)) bus.marker.addTo(map);
-            } else {
-                if (map.hasLayer(bus.marker)) {
-                    bus.marker.closePopup();
-                    map.removeLayer(bus.marker);
-                }
-            }
-        });
-
-        const activeBus = buses.find(b => b.id === activeBusId);
-        if (nextStopRing && activeBus) {
-            const dir = getBusDirection(activeBus);
-            const showRing = visible && currentDirection.includes(dir);
-            if (showRing) {
-                if (!map.hasLayer(nextStopRing)) nextStopRing.addTo(map);
-            } else {
-                if (map.hasLayer(nextStopRing)) map.removeLayer(nextStopRing);
-            }
-        }
-
-        if (currentDirection.length === 1) {
-            routePassedLayer.setStyle({ opacity: 0.35 });
-            routeRemainingLayer.setStyle({ opacity: 0.35 });
-        } else {
-            routePassedLayer.setStyle({ opacity: 0.7 });
-            routeRemainingLayer.setStyle({ opacity: 0.85 });
-        }
-    }
-
-    function positionAtProgress(path, cum, s) {
+    function positionAtProgress(route, s) {
+        const path = route.path, cum = route.cumPath;
         if (s <= 0) return [path[0][0], path[0][1]];
         if (s >= cum[cum.length-1]) return [path[path.length-1][0], path[path.length-1][1]];
         for (let i = 1; i < cum.length; i++) {
@@ -841,11 +736,15 @@
         return [path[path.length-1][0], path[path.length-1][1]];
     }
 
-    function slicePath(path, cum, s1, s2) {
+    function slicePath(route, s1, s2) {
         if (s1 > s2) [s1, s2] = [s2, s1];
-        const result = [positionAtProgress(path, cum, s1)];
-        for (let i = 0; i < path.length; i++) if (cum[i] > s1+1e-6 && cum[i] < s2-1e-6) result.push([path[i][0], path[i][1]]);
-        result.push(positionAtProgress(path, cum, s2));
+        const result = [positionAtProgress(route, s1)];
+        for (let i = 0; i < route.path.length; i++) {
+            if (route.cumPath[i] > s1+1e-6 && route.cumPath[i] < s2-1e-6) {
+                result.push([route.path[i][0], route.path[i][1]]);
+            }
+        }
+        result.push(positionAtProgress(route, s2));
         return result;
     }
 
@@ -857,25 +756,27 @@
             const from = bus.transitFrom, to = bus.transitTo;
             return [from[0] + e*(to[0]-from[0]), from[1] + e*(to[1]-from[1])];
         }
-        return positionAtProgress(route442, cum442, bus.progress);
+        const route = ROUTES[bus.routeId];
+        return positionAtProgress(route, bus.progress);
     }
 
     function busBearing(bus) {
+        const route = ROUTES[bus.routeId];
         let from, to;
         if (bus.phase === 'departing' || bus.phase === 'arriving') {
             from = [bus.lat, bus.lng];
             to = bus.transitTo;
         } else if (bus.phase === 'driving') {
-            let idx = cum442.length - 1;
-            for (let i = 1; i < cum442.length; i++) {
-                if (bus.progress <= cum442[i]) { idx = i; break; }
+            let idx = route.cumPath.length - 1;
+            for (let i = 1; i < route.cumPath.length; i++) {
+                if (bus.progress <= route.cumPath[i]) { idx = i; break; }
             }
             if (bus.direction > 0) {
-                from = route442[Math.max(0, idx - 1)];
-                to   = route442[Math.min(route442.length - 1, idx)];
+                from = route.path[Math.max(0, idx - 1)];
+                to   = route.path[Math.min(route.path.length - 1, idx)];
             } else {
-                from = route442[Math.min(route442.length - 1, idx)];
-                to   = route442[Math.max(0, idx - 1)];
+                from = route.path[Math.min(route.path.length - 1, idx)];
+                to   = route.path[Math.max(0, idx - 1)];
             }
         } else {
             return 0;
@@ -890,27 +791,34 @@
         return Math.abs(((a - b) % 360 + 540) % 360 - 180);
     }
 
+    function getBusDirection(bus) {
+        if (bus.phase === 'parked' || bus.phase === 'arriving') {
+            return bus.currentTerminal === 'start' ? 1 : -1;
+        }
+        return bus.direction;
+    }
+
     // ============================================================
     // ВЫЧИСЛЕНИЕ ПОЗИЦИИ ПО РАСПИСАНИЮ
     // ============================================================
-    function elapsedToProgress(elapsedSec, direction) {
+    function elapsedToProgress(elapsedSec, direction, route) {
         let timeLeft = elapsedSec;
         let tripP = 0;
-        const stops = direction > 0 ? intermediateStops : [...intermediateStops].reverse();
+        const stops = direction > 0 ? route.intermediateStops : [...route.intermediateStops].reverse();
 
         const travelFromTo = (p1, p2) => {
-            if (direction > 0) return travelTimeSec(p1, p2);
-            return travelTimeSec(PATH_LENGTH - p2, PATH_LENGTH - p1);
+            if (direction > 0) return travelTimeSec(route, p1, p2);
+            return travelTimeSec(route, route.pathLength - p2, route.pathLength - p1);
         };
 
         const advance = (p, dt) => {
-            if (direction > 0) return computeTargetProgress({ progress: p, direction: 1 }, dt);
-            const endRoute = computeTargetProgress({ progress: PATH_LENGTH - p, direction: -1 }, dt);
-            return PATH_LENGTH - endRoute;
+            if (direction > 0) return computeTargetProgress({ progress: p, direction: 1 }, route, dt);
+            const endRoute = computeTargetProgress({ progress: route.pathLength - p, direction: -1 }, route, dt);
+            return route.pathLength - endRoute;
         };
 
         for (const stop of stops) {
-            const nextP = direction > 0 ? stop.s : (PATH_LENGTH - stop.s);
+            const nextP = direction > 0 ? stop.s : (route.pathLength - stop.s);
             const needed = travelFromTo(tripP, nextP);
             if (timeLeft < needed) return { tripP: advance(tripP, timeLeft), pauseRemaining: 0 };
             timeLeft -= needed;
@@ -922,22 +830,23 @@
     }
 
     function getBusStateAt(bus, targetMs) {
+        const route = ROUTES[bus.routeId];
         const d = new Date(targetMs);
         const todayStart = new Date(d);
         todayStart.setHours(0, 0, 0, 0);
         const dayStartMs = todayStart.getTime();
         const DAY_MS = 86400000;
         const TRANSIT = CONFIG.TRANSIT_SEC;
-        const TRIP = ONE_WAY_SEC;
+        const TRIP = route.oneWaySec;
 
         const allDeps = [];
         for (const dayOffset of [-1, 0, 1]) {
             const base = dayStartMs + dayOffset * DAY_MS;
-            for (const t of bus.schedule.patp) {
+            for (const t of bus.schedule.start) {
                 const [h, m] = t.split(':').map(Number);
                 allDeps.push({ time: base + (h * 60 + m) * 60000, dir: 1 });
             }
-            for (const t of bus.schedule.eman) {
+            for (const t of bus.schedule.end) {
                 const [h, m] = t.split(':').map(Number);
                 allDeps.push({ time: base + (h * 60 + m) * 60000, dir: -1 });
             }
@@ -952,12 +861,12 @@
 
         if (!lastDep) {
             const dir = nextDep ? nextDep.dir : 1;
-            const terminal = dir > 0 ? 'patp' : 'eman';
+            const terminal = dir > 0 ? 'start' : 'end';
             return {
                 phase: 'parked', direction: dir,
-                progress: terminal === 'patp' ? 0 : PATH_LENGTH,
+                progress: terminal === 'start' ? 0 : route.pathLength,
                 pauseRemaining: 0, currentTerminal: terminal,
-                departureTime: nextDep ? nextDep.time : findDeparture(bus.schedule.patp, targetMs),
+                departureTime: nextDep ? nextDep.time : findDeparture(bus.schedule.start, targetMs),
                 transitFrom: null, transitTo: null, transitRemaining: 0
             };
         }
@@ -965,22 +874,22 @@
         const elapsedSec = (targetMs - lastDep.time) / 1000;
 
         if (elapsedSec < TRANSIT) {
-            const terminal = lastDep.dir > 0 ? 'patp' : 'eman';
-            const parking = getParkingPosition({ currentTerminal: terminal, parkingIndex: bus.parkingIndex });
+            const terminal = lastDep.dir > 0 ? 'start' : 'end';
+            const parking = getParkingPosition({ routeId: bus.routeId, currentTerminal: terminal, parkingIndex: bus.parkingIndex });
             return {
                 phase: 'departing', direction: lastDep.dir,
-                progress: lastDep.dir > 0 ? 0 : PATH_LENGTH,
+                progress: lastDep.dir > 0 ? 0 : route.pathLength,
                 pauseRemaining: 0, currentTerminal: null, departureTime: null,
                 transitFrom: parking,
-                transitTo: lastDep.dir > 0 ? route442[0] : route442[route442.length - 1],
+                transitTo: lastDep.dir > 0 ? route.path[0] : route.path[route.path.length - 1],
                 transitRemaining: TRANSIT - elapsedSec
             };
         }
 
         if (elapsedSec < TRANSIT + TRIP) {
             const driveElapsed = elapsedSec - TRANSIT;
-            const result = elapsedToProgress(driveElapsed, lastDep.dir);
-            const progress = lastDep.dir > 0 ? result.tripP : PATH_LENGTH - result.tripP;
+            const result = elapsedToProgress(driveElapsed, lastDep.dir, route);
+            const progress = lastDep.dir > 0 ? result.tripP : route.pathLength - result.tripP;
             return {
                 phase: 'driving', direction: lastDep.dir, progress,
                 pauseRemaining: result.pauseRemaining,
@@ -991,65 +900,49 @@
 
         if (elapsedSec < TRANSIT + TRIP + TRANSIT) {
             const arriveElapsed = elapsedSec - TRANSIT - TRIP;
-            const terminal = lastDep.dir > 0 ? 'eman' : 'patp';
-            const parking = getParkingPosition({ currentTerminal: terminal, parkingIndex: bus.parkingIndex });
+            const terminal = lastDep.dir > 0 ? 'end' : 'start';
+            const parking = getParkingPosition({ routeId: bus.routeId, currentTerminal: terminal, parkingIndex: bus.parkingIndex });
             return {
                 phase: 'arriving', direction: lastDep.dir,
-                progress: lastDep.dir > 0 ? PATH_LENGTH : 0,
+                progress: lastDep.dir > 0 ? route.pathLength : 0,
                 pauseRemaining: 0, currentTerminal: terminal, departureTime: null,
-                transitFrom: lastDep.dir > 0 ? route442[route442.length - 1] : route442[0],
+                transitFrom: lastDep.dir > 0 ? route.path[route.path.length - 1] : route.path[0],
                 transitTo: parking,
                 transitRemaining: TRANSIT - arriveElapsed
             };
         }
 
-        const terminal = lastDep.dir > 0 ? 'eman' : 'patp';
+        const terminal = lastDep.dir > 0 ? 'end' : 'start';
         return {
-            phase: 'parked', direction: terminal === 'patp' ? 1 : -1,
-            progress: terminal === 'patp' ? 0 : PATH_LENGTH,
+            phase: 'parked', direction: terminal === 'start' ? 1 : -1,
+            progress: terminal === 'start' ? 0 : route.pathLength,
             pauseRemaining: 0, currentTerminal: terminal,
             departureTime: nextDep ? nextDep.time : findDeparture(
-                terminal === 'patp' ? bus.schedule.patp : bus.schedule.eman, targetMs),
+                terminal === 'start' ? bus.schedule.start : bus.schedule.end, targetMs),
             transitFrom: null, transitTo: null, transitRemaining: 0
         };
     }
 
     // ============================================================
-    // АВТОБУСЫ
+    // ИНИЦИАЛИЗАЦИЯ СОСТОЯНИЙ И МАРКЕРОВ
     // ============================================================
-    let activeBusId = 'bus-2';
-
-    let buses = BUSES_CONFIG.map((cfg, i) => {
-        const parking = PATP_PARKING[i];
-        return {
-            ...cfg, route: '442', parkingIndex: i,
-            progress: 0, direction: 1, pauseRemaining: 0,
-            phase: 'parked',
-            currentTerminal: 'patp',
-            departureTime: null,
-            transitFrom: null, transitTo: null, transitRemaining: 0,
-            lat: parking[0], lng: parking[1], marker: null,
-            _lastBearing: undefined
-        };
-    });
-
     buses.forEach(bus => {
         const state = getBusStateAt(bus, simTime);
         Object.assign(bus, state);
         const pos = getBusPosition(bus);
         bus.lat = pos[0];
         bus.lng = pos[1];
-        const phaseRu = { parked: 'на конечной', departing: 'выезд', driving: 'на маршруте', arriving: 'заезд' }[state.phase];
-        console.log(`[${bus.name}] при загрузке: ${phaseRu} (progress=${state.progress.toFixed(1)}, место ${bus.parkingIndex+1})`);
     });
 
     function getDirectionName(bus) {
+        const route = ROUTES[bus.routeId];
         if (bus.phase === 'parked' || bus.phase === 'arriving')
-            return bus.currentTerminal === 'patp' ? 'Серпов – Еманкаши' : 'Еманкаши – Серпов';
-        return bus.direction > 0 ? 'Серпов – Еманкаши' : 'Еманкаши – Серпов';
+            return bus.currentTerminal === 'start' ? route.directionNames.forward : route.directionNames.backward;
+        return bus.direction > 0 ? route.directionNames.forward : route.directionNames.backward;
     }
 
     function getPopupHtml(bus) {
+        const route = ROUTES[bus.routeId];
         const spd = busSpeedLabel(bus);
 
         const next = getNextStop(bus);
@@ -1071,16 +964,18 @@
         }
 
         return `<b>${bus.name}</b><br>
+            Маршрут: ${route.id}<br>
             Направление: ${getDirectionName(bus)}<br>
             Следующая остановка: ${nextLine}<br>
             Класс автобуса: ${bus.busClass}<br>
             Доступная среда: ${bus.accessible ? 'да' : 'нет'}<br>
             Перевозчик: ${bus.carrier}<br>
             Заполненность автобуса: ${loadHtml}<br>
-            Скорость: <b style="color: ${spd.kmh > 0 ? '#2563eb' : '#94a3b8'};">${spd.text}</b>`;
+            Скорость: <b style="color: ${spd.kmh > 0 ? route.color : '#94a3b8'};">${spd.text}</b>`;
     }
 
     function makeBusIcon(bus) {
+        const route = ROUTES[bus.routeId];
         const isActive = bus.id === activeBusId;
         const size = isActive ? 38 : 32, anchor = size / 2;
         const border = isActive ? '3px' : '2px';
@@ -1088,7 +983,7 @@
         let bg, icon, anim = '';
         if (bus.phase === 'parked') { bg = PARKED_COLOR; icon = '<i class="fas fa-pause"></i>'; anim = 'animation: waiting-pulse 2s infinite;'; }
         else if (bus.phase === 'departing' || bus.phase === 'arriving') { bg = TRANSIT_COLOR; icon = '<i class="fas fa-bus"></i>'; }
-        else { bg = BUS_COLOR; icon = '<i class="fas fa-bus"></i>'; }
+        else { bg = route.color; icon = '<i class="fas fa-bus"></i>'; }
 
         let arrow = '';
         if (bus.phase !== 'parked') {
@@ -1127,41 +1022,48 @@
         buses.forEach(b => { if (b.id === old || b.id === id) updateBusIcon(b); });
         updateRouteHighlight();
         updateNextStopHighlight();
-        renderBusList(currentFilter);
+        renderBusList('all');
     }
 
     function computeETA(bus) {
+        const route = ROUTES[bus.routeId];
         const s = bus.progress;
         let travelT, pauses;
         if (bus.direction > 0) {
-            travelT = travelTimeSec(s, PATH_LENGTH);
+            travelT = travelTimeSec(route, s, route.pathLength);
             pauses = 0;
-            for (const stop of intermediateStops) if (stop.s > s+1) pauses++;
+            for (const stop of route.intermediateStops) if (stop.s > s+1) pauses++;
         } else {
-            travelT = travelTimeSec(0, s);
+            travelT = travelTimeSec(route, 0, s);
             pauses = 0;
-            for (const stop of intermediateStops) if (stop.s < s-1) pauses++;
+            for (const stop of route.intermediateStops) if (stop.s < s-1) pauses++;
         }
         return Math.max(1, Math.round((travelT + pauses*CONFIG.STOP_PAUSE_SEC) / 60));
     }
 
     function updateRouteHighlight() {
+        for (const routeId in ROUTES) {
+            const r = ROUTES[routeId];
+            r.passedLayer.setLatLngs([]);
+            r.remainingLayer.setLatLngs(r.path);
+        }
         const bus = buses.find(b => b.id === activeBusId);
         if (!bus) return;
+        const route = ROUTES[bus.routeId];
 
         let effDir = bus.direction;
         let effS   = bus.progress;
         if (bus.phase === 'parked' || bus.phase === 'arriving') {
-            effDir = bus.currentTerminal === 'patp' ? 1 : -1;
-            effS   = effDir > 0 ? 0 : PATH_LENGTH;
+            effDir = bus.currentTerminal === 'start' ? 1 : -1;
+            effS   = effDir > 0 ? 0 : route.pathLength;
         }
 
         if (effDir > 0) {
-            routePassedLayer.setLatLngs(slicePath(route442, cum442, 0, effS));
-            routeRemainingLayer.setLatLngs(slicePath(route442, cum442, effS, PATH_LENGTH));
+            route.passedLayer.setLatLngs(slicePath(route, 0, effS));
+            route.remainingLayer.setLatLngs(slicePath(route, effS, route.pathLength));
         } else {
-            routePassedLayer.setLatLngs(slicePath(route442, cum442, effS, PATH_LENGTH));
-            routeRemainingLayer.setLatLngs(slicePath(route442, cum442, 0, effS));
+            route.passedLayer.setLatLngs(slicePath(route, effS, route.pathLength));
+            route.remainingLayer.setLatLngs(slicePath(route, 0, effS));
         }
     }
 
@@ -1200,24 +1102,21 @@
         if (!el) return;
         el.innerHTML = '';
 
-        let filtered = filterRoute === 'all' ? buses : buses.filter(b => b.route === filterRoute);
-
-        if (currentDirection.length > 0) {
-            filtered = filtered.filter(b => {
-                const d = getBusDirection(b);
-                return currentDirection.includes(d);
+        let filtered = buses;
+        if (currentSelections.length > 0) {
+            filtered = buses.filter(bus => {
+                const dir = getBusDirection(bus);
+                return currentSelections.some(s => s.routeId === bus.routeId && s.direction === dir);
             });
         }
 
         filtered.forEach(bus => {
             const isActive = bus.id === activeBusId;
             let st = getStatusText(bus);
-
             if (isActive && bus.phase === 'driving') {
                 const next = getNextStop(bus);
                 if (next) st = { time: formatEta(next.sec), label: `→ ${next.stop.name}`, color: '#f59e0b' };
             }
-
             const load = getBusLoad(bus);
             let loadBarHtml;
             if (load === null) {
@@ -1229,12 +1128,9 @@
                     <div style="flex:1; height:4px; background:#e5e7eb; border-radius:2px; overflow:hidden;">
                         <div style="width:${load}%; height:100%; background:${loadClr}; border-radius:2px; transition: width 0.4s;"></div>
                     </div>
-                    <span style="font-size:11px; font-weight:600; color:${loadClr}; white-space:nowrap;">
-                        ${load}% · ${loadTxt}
-                    </span>
+                    <span style="font-size:11px; font-weight:600; color:${loadClr}; white-space:nowrap;">${load}% · ${loadTxt}</span>
                 </div>`;
             }
-
             const card = document.createElement('div');
             card.className = 'bus-card' + (isActive ? ' active' : '');
             card.innerHTML = `
@@ -1258,6 +1154,192 @@
     }
 
     // ============================================================
+    // ВЫПАДАЮЩИЙ ВЫБОР МАРШРУТА
+    // ============================================================
+    let currentSelections = [];
+
+    const picker = document.getElementById('routePicker');
+    const pickerTrigger = document.getElementById('routePickerTrigger');
+    const pickerPanel = document.getElementById('routePickerPanel');
+    const pickerLabel = document.getElementById('routePickerLabel');
+    const pickerClear = document.getElementById('routePickerClear');
+
+    function updateRouteSummary() {
+        const summary = document.getElementById('routeSummary');
+        const numEl = document.getElementById('rsNumber');
+        const labelEl = document.getElementById('rsLabel');
+        if (!summary) return;
+        if (currentSelections.length === 0) { summary.classList.remove('visible'); return; }
+        let count = 0;
+        buses.forEach(bus => {
+            const dir = getBusDirection(bus);
+            if (currentSelections.some(s => s.routeId === bus.routeId && s.direction === dir)) count++;
+        });
+        const n = count;
+        const mod10 = n % 10, mod100 = n % 100;
+        let word = 'автобусов';
+        if (mod10 === 1 && mod100 !== 11) word = 'автобус';
+        else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) word = 'автобуса';
+        numEl.textContent = count;
+        labelEl.textContent = word;
+        summary.classList.add('visible');
+    }
+
+    function getPickerItems() {
+        const items = [];
+        for (const routeId in ROUTES) {
+            const r = ROUTES[routeId];
+            items.push({ routeId, dir: 1,  text: `${routeId} (${r.directionNames.forward})` });
+            items.push({ routeId, dir: -1, text: `${routeId} (${r.directionNames.backward})` });
+        }
+        return items;
+    }
+
+    function buildRoutePicker() {
+        const items = getPickerItems();
+        let draftSelections = [...currentSelections];
+        pickerPanel.innerHTML = items.map(d => {
+            const selected = draftSelections.some(s => s.routeId === d.routeId && s.direction === d.dir);
+            return `<div class="rpp-item${selected ? ' selected' : ''}" data-route="${d.routeId}" data-dir="${d.dir}">
+                <span class="rpp-checkbox"><i class="fas fa-check"></i></span>
+                <span class="rpp-dir">${d.text}</span>
+            </div>`;
+        }).join('') + `
+            <div class="rpp-footer">
+                <button class="rpp-btn rpp-btn-reset" id="rppReset"><i class="fas fa-xmark"></i>Сбросить</button>
+                <button class="rpp-btn rpp-btn-apply" id="rppApply" ${draftSelections.length === 0 ? 'disabled' : ''}><i class="fas fa-check"></i>Показать</button>
+            </div>`;
+
+        const updateDraftUI = () => {
+            pickerPanel.querySelectorAll('.rpp-item').forEach(it => {
+                const sel = draftSelections.some(s => s.routeId === it.dataset.route && s.direction === Number(it.dataset.dir));
+                it.classList.toggle('selected', sel);
+            });
+            document.getElementById('rppApply').disabled = (draftSelections.length === 0);
+        };
+
+        pickerPanel.querySelectorAll('.rpp-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const routeId = item.dataset.route;
+                const dir = Number(item.dataset.dir);
+                const idx = draftSelections.findIndex(s => s.routeId === routeId && s.direction === dir);
+                if (idx >= 0) draftSelections.splice(idx, 1);
+                else draftSelections.push({ routeId, direction: dir });
+                updateDraftUI();
+            });
+        });
+
+        document.getElementById('rppReset').addEventListener('click', () => {
+            draftSelections = [];
+            updateDraftUI();
+            currentSelections = [];
+            applyPickerState();
+            renderBusList('all');
+            updateRouteVisibility();
+        });
+
+        document.getElementById('rppApply').addEventListener('click', () => {
+            if (draftSelections.length === 0) return;
+            currentSelections = [...draftSelections];
+            closePicker();
+            applyPickerState();
+            renderBusList('all');
+            updateRouteVisibility();
+        });
+    }
+
+    function applyPickerState() {
+        if (currentSelections.length === 0) {
+            pickerLabel.textContent = 'Выберите маршрут';
+            pickerClear.style.display = 'none';
+            pickerTrigger.classList.remove('open');
+        } else if (currentSelections.length === 1) {
+            const s = currentSelections[0];
+            const r = ROUTES[s.routeId];
+            const dirText = s.direction === 1 ? r.directionNames.forward : r.directionNames.backward;
+            pickerLabel.textContent = `Маршрут ${s.routeId} · ${dirText}`;
+            pickerClear.style.display = 'inline-flex';
+        } else {
+            const routeIds = [...new Set(currentSelections.map(s => s.routeId))];
+            pickerLabel.textContent = `Маршруты: ${routeIds.join(', ')} · ${currentSelections.length} напр.`;
+            pickerClear.style.display = 'inline-flex';
+        }
+    }
+
+    function openPicker() { pickerPanel.classList.add('open'); pickerTrigger.classList.add('open'); }
+    function closePicker() { pickerPanel.classList.remove('open'); pickerTrigger.classList.remove('open'); }
+    function togglePicker() { pickerPanel.classList.contains('open') ? closePicker() : (buildRoutePicker(), openPicker()); }
+
+    pickerTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (e.target.closest('#routePickerClear')) return;
+        togglePicker();
+    });
+
+    pickerClear.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentSelections = [];
+        closePicker();
+        applyPickerState();
+        renderBusList('all');
+        updateRouteVisibility();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!picker.contains(e.target)) closePicker();
+    });
+
+    // ============================================================
+    // ВИДИМОСТЬ
+    // ============================================================
+    function updateRouteVisibility() {
+        updateRouteSummary();
+
+        for (const routeId in ROUTES) {
+            const route = ROUTES[routeId];
+            const selectedDirs = currentSelections.filter(s => s.routeId === routeId).map(s => s.direction);
+            const visible = selectedDirs.length > 0;
+
+            [route.passedLayer, route.remainingLayer, ...route.stopMarkers, ...route.parkingMarkers].forEach(layer => {
+                if (visible && !map.hasLayer(layer)) layer.addTo(map);
+                else if (!visible && map.hasLayer(layer)) map.removeLayer(layer);
+            });
+
+            buses.filter(b => b.routeId === routeId).forEach(bus => {
+                const dir = getBusDirection(bus);
+                const showBus = visible && selectedDirs.includes(dir);
+                if (showBus) {
+                    if (!map.hasLayer(bus.marker)) bus.marker.addTo(map);
+                } else {
+                    if (map.hasLayer(bus.marker)) {
+                        bus.marker.closePopup();
+                        map.removeLayer(bus.marker);
+                    }
+                }
+            });
+
+            if (selectedDirs.length === 1) {
+                route.passedLayer.setStyle({ opacity: 0.35 });
+                route.remainingLayer.setStyle({ opacity: 0.35 });
+            } else {
+                route.passedLayer.setStyle({ opacity: 0.7 });
+                route.remainingLayer.setStyle({ opacity: 0.85 });
+            }
+        }
+
+        const activeBus = buses.find(b => b.id === activeBusId);
+        if (nextStopRing && activeBus) {
+            const dir = getBusDirection(activeBus);
+            const showRing = currentSelections.some(s => s.routeId === activeBus.routeId && s.direction === dir);
+            if (showRing) {
+                if (!map.hasLayer(nextStopRing)) nextStopRing.addTo(map);
+            } else {
+                if (map.hasLayer(nextStopRing)) map.removeLayer(nextStopRing);
+            }
+        }
+    }
+
+    // ============================================================
     // АНИМАЦИЯ
     // ============================================================
     let lastTime = performance.now(), renderAccum = 0, popupAccum = 0, clockAccum = 0;
@@ -1272,17 +1354,18 @@
         const dt_sim = (currentMode === 'real') ? dt_real : dt_real * CONFIG.DEMO_SPEED;
 
         buses.forEach(bus => {
+            const route = ROUTES[bus.routeId];
+
             if (bus.phase === 'parked') {
                 if (simTime >= bus.departureTime) {
                     const terminal = bus.currentTerminal;
                     bus.phase = 'departing';
-                    bus.direction = terminal === 'patp' ? 1 : -1;
-                    bus.progress = bus.direction > 0 ? 0 : PATH_LENGTH;
+                    bus.direction = terminal === 'start' ? 1 : -1;
+                    bus.progress = bus.direction > 0 ? 0 : route.pathLength;
                     bus.transitFrom = getParkingPosition(bus);
-                    bus.transitTo = bus.direction > 0 ? route442[0] : route442[route442.length - 1];
+                    bus.transitTo = bus.direction > 0 ? route.path[0] : route.path[route.path.length - 1];
                     bus.transitRemaining = CONFIG.TRANSIT_SEC;
                     bus.departureTime = null;
-                    console.log(`[МСК ${formatTimeWithSeconds(simTime)}] ▶ ${bus.name}: выезд с ${terminal === 'patp' ? 'ПАТП' : 'Еманкаши'}`);
                     updateBusIcon(bus); updatePopup(bus);
                 }
             }
@@ -1293,7 +1376,6 @@
                     bus.phase = 'driving';
                     bus.pauseRemaining = 0;
                     bus.currentTerminal = null;
-                    console.log(`[МСК ${formatTimeWithSeconds(simTime)}] 🚌 ${bus.name}: на маршруте`);
                     updateBusIcon(bus); updatePopup(bus);
                 }
             }
@@ -1302,22 +1384,21 @@
                     bus.pauseRemaining -= dt_sim;
                     if (bus.pauseRemaining < 0) bus.pauseRemaining = 0;
                 } else {
-                    const np = computeTargetProgress(bus, dt_sim);
+                    const np = computeTargetProgress(bus, route, dt_sim);
 
                     if (bus.direction > 0) {
-                        if (np >= PATH_LENGTH) {
-                            bus.progress = PATH_LENGTH;
+                        if (np >= route.pathLength) {
+                            bus.progress = route.pathLength;
                             bus.phase = 'arriving';
-                            bus.currentTerminal = 'eman';
-                            bus.transitFrom = route442[route442.length - 1];
+                            bus.currentTerminal = 'end';
+                            bus.transitFrom = route.path[route.path.length - 1];
                             bus.transitTo = getParkingPosition(bus);
                             bus.transitRemaining = CONFIG.TRANSIT_SEC;
-                            bus.departureTime = findDeparture(bus.schedule.eman, simTime);
-                            console.log(`[МСК ${formatTimeWithSeconds(simTime)}] ⏹ ${bus.name}: заезд на парковку Еманкаши. Отпр. ${formatTime(bus.departureTime)}`);
+                            bus.departureTime = findDeparture(bus.schedule.end, simTime);
                             updateBusIcon(bus); updatePopup(bus);
                         } else {
                             let stopped = false;
-                            for (const stop of intermediateStops) {
+                            for (const stop of route.intermediateStops) {
                                 if (bus.progress < stop.s && np >= stop.s) { bus.progress = stop.s; bus.pauseRemaining = CONFIG.STOP_PAUSE_SEC; stopped = true; break; }
                             }
                             if (!stopped) bus.progress = np;
@@ -1326,17 +1407,16 @@
                         if (np <= 0) {
                             bus.progress = 0;
                             bus.phase = 'arriving';
-                            bus.currentTerminal = 'patp';
-                            bus.transitFrom = route442[0];
+                            bus.currentTerminal = 'start';
+                            bus.transitFrom = route.path[0];
                             bus.transitTo = getParkingPosition(bus);
                             bus.transitRemaining = CONFIG.TRANSIT_SEC;
-                            bus.departureTime = findDeparture(bus.schedule.patp, simTime);
-                            console.log(`[МСК ${formatTimeWithSeconds(simTime)}] ⏹ ${bus.name}: заезд на парковку ПАТП. Отпр. ${formatTime(bus.departureTime)}`);
+                            bus.departureTime = findDeparture(bus.schedule.start, simTime);
                             updateBusIcon(bus); updatePopup(bus);
                         } else {
                             let stopped = false;
-                            for (let i = intermediateStops.length-1; i >= 0; i--) {
-                                const stop = intermediateStops[i];
+                            for (let i = route.intermediateStops.length-1; i >= 0; i--) {
+                                const stop = route.intermediateStops[i];
                                 if (bus.progress > stop.s && np <= stop.s) { bus.progress = stop.s; bus.pauseRemaining = CONFIG.STOP_PAUSE_SEC; stopped = true; break; }
                             }
                             if (!stopped) bus.progress = np;
@@ -1349,7 +1429,6 @@
                 if (bus.transitRemaining <= 0) {
                     bus.transitRemaining = 0;
                     bus.phase = 'parked';
-                    console.log(`[МСК ${formatTimeWithSeconds(simTime)}] 🅿 ${bus.name}: на парковке (место ${bus.parkingIndex+1})`);
                     updateBusIcon(bus); updatePopup(bus);
                 }
             }
@@ -1374,7 +1453,7 @@
         renderAccum += dt_real;
         if (renderAccum >= 0.5) {
             renderAccum = 0;
-            renderBusList(currentFilter);
+            renderBusList('all');
             updateNextStopHighlight();
             updateRouteVisibility();
         }
@@ -1406,16 +1485,29 @@
             updateNextStopHighlight();
         }
         updateModeButton();
-        renderBusList(currentFilter);
+        renderBusList('all');
         setTimeout(() => map.invalidateSize(), 50);
     });
 
     map.on('click', function(e) {
         const y = Math.round(e.latlng.lat), x = Math.round(e.latlng.lng);
         let closest = null, minDist = Infinity;
-        stopsWithS.forEach(s => { const d = Math.hypot(s.lat-y, s.lng-x); if (d < minDist) { minDist = d; closest = { name: s.name }; } });
-        PATP_PARKING.forEach((p, i) => { const d = Math.hypot(p[0]-y, p[1]-x); if (d < minDist) { minDist = d; closest = { name: `ПАТП парковка ${i+1}` }; } });
-        EMAN_PARKING.forEach((p, i) => { const d = Math.hypot(p[0]-y, p[1]-x); if (d < minDist) { minDist = d; closest = { name: `Еманкаши парковка ${i+1}` }; } });
+
+        for (const routeId in ROUTES) {
+            const route = ROUTES[routeId];
+            route.stopsWithS.forEach(s => {
+                const d = Math.hypot(s.lat-y, s.lng-x);
+                if (d < minDist) { minDist = d; closest = { name: `${s.name} [${routeId}]` }; }
+            });
+            route.parkings.start.spots.forEach((p, i) => {
+                const d = Math.hypot(p[0]-y, p[1]-x);
+                if (d < minDist) { minDist = d; closest = { name: `${route.parkings.start.name} парковка ${i+1} [${routeId}]` }; }
+            });
+            route.parkings.end.spots.forEach((p, i) => {
+                const d = Math.hypot(p[0]-y, p[1]-x);
+                if (d < minDist) { minDist = d; closest = { name: `${route.parkings.end.name} парковка ${i+1} [${routeId}]` }; }
+            });
+        }
 
         console.log(`Клик: [${y}, ${x}]`);
         if (closest) console.log(`Ближайшее: "${closest.name}" → [${y}, ${x}]`);
@@ -1425,19 +1517,14 @@
         `).openOn(map);
     });
 
-    // Пересчёт размера карты при изменении окна/повороте экрана
-    window.addEventListener('resize', () => {
-        setTimeout(() => map.invalidateSize(), 100);
-    });
-    window.addEventListener('orientationchange', () => {
-        setTimeout(() => map.invalidateSize(), 200);
-    });
+    window.addEventListener('resize', () => setTimeout(() => map.invalidateSize(), 100));
+    window.addEventListener('orientationchange', () => setTimeout(() => map.invalidateSize(), 200));
 
     updateModeButton();
     applyPickerState();
     updateRouteSummary();
     document.getElementById('simTimeText').textContent = formatTimeWithSeconds(simTime);
-    renderBusList(currentFilter);
+    renderBusList('all');
     updateRouteVisibility();
     requestAnimationFrame(animate);
     </script>

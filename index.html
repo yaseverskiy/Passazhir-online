@@ -121,7 +121,6 @@
         @keyframes nextStopPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
         .next-stop-ring { animation: nextStopPulse 1.5s ease-in-out infinite; }
 
-        /* ── Бейдж с номером маршрута ── */
         .bus-route-badge {
             font-family: 'Inter', 'Intro', sans-serif;
             font-weight: 900;
@@ -209,15 +208,15 @@
         DEMO_SPEED: 70,
         STOP_PAUSE_SEC: 15,
         TRANSIT_SEC: 8,
+        LUNCH_THRESHOLD_MS: 30 * 60 * 1000, // 🆕 стоянка ≥ 30 мин = обед
     };
     const MOSCOW_OFFSET_HOURS = 3;
     const TRANSIT_COLOR = '#f59e0b';
     const PARKED_COLOR = '#94a3b8';
+    const LUNCH_COLOR = '#a855f7';   // 🆕
+    const DEPOT_COLOR = '#6b7280';   // 🆕
     let currentMode = CONFIG.MODE;
 
-    // ============================================================
-    // ДАННЫЕ МАРШРУТОВ
-    // ============================================================
     const ROUTES_DATA = {
         '442': {
             id: '442',
@@ -354,9 +353,6 @@
 
     const ROUTES = {};
 
-    // ============================================================
-    // КАРТА
-    // ============================================================
     const map = L.map('map', { crs: L.CRS.Simple, minZoom: -1, maxZoom: 2 });
     const bounds = [[0, 0], [1000, 1000]];
     L.imageOverlay('map.png', bounds).addTo(map);
@@ -404,8 +400,6 @@
         route.MAP_METERS_PER_UNIT = moveSecTotal / (l1 / v1mps + l2 / v2mps);
         route.V1 = v1mps / route.MAP_METERS_PER_UNIT;
         route.V2 = v2mps / route.MAP_METERS_PER_UNIT;
-
-        console.log(`[${route.id}] путь ${route.pathLength.toFixed(1)} ед., масштаб ${route.MAP_METERS_PER_UNIT.toFixed(2)} м/ед.`);
     }
 
     function speedAt(route, s) { return s < route.sPort ? route.V1 : route.V2; }
@@ -470,8 +464,27 @@
     function easeInOutCubic(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
 
     // ============================================================
-    // ИНИЦИАЛИЗАЦИЯ МАРШРУТОВ (слои)
+    // 🆕 ХЕЛПЕРЫ ДЛЯ «ОБЕД» / «В ПАРКЕ»
     // ============================================================
+    function getLastDepartureMs(bus, targetMs) {
+        const d = new Date(targetMs);
+        const todayStart = new Date(d); todayStart.setHours(0,0,0,0);
+        let last = -Infinity;
+        for (const arr of [bus.schedule.start, bus.schedule.end]) {
+            for (const t of arr) {
+                const [h,m] = t.split(':').map(Number);
+                const ms = todayStart.getTime() + (h*60+m)*60000;
+                if (ms > last) last = ms;
+            }
+        }
+        return last;
+    }
+
+    function getEndOfDayMs(bus, route) {
+        const lastDep = getLastDepartureMs(bus, simTime);
+        return lastDep + (route.oneWaySec + CONFIG.TRANSIT_SEC * 2) * 1000;
+    }
+
     for (const routeId in ROUTES_DATA) {
         const route = ROUTES_DATA[routeId];
         ROUTES[routeId] = route;
@@ -509,9 +522,6 @@
         });
     }
 
-    // ============================================================
-    // АВТОБУСЫ
-    // ============================================================
     let activeBusId = 'bus-442-2';
     let buses = [];
 
@@ -543,6 +553,8 @@
 
     function busSpeedLabel(bus) {
         const route = ROUTES[bus.routeId];
+        if (bus.phase === 'inDepot') return { text: 'в парке', kmh: 0 };   // 🆕
+        if (bus.phase === 'lunch')   return { text: 'на обеде', kmh: 0 };  // 🆕
         if (bus.phase === 'parked') return { text: 'ожидание', kmh: 0 };
         if (bus.phase === 'departing') return { text: 'выезд с парковки', kmh: 0 };
         if (bus.phase === 'arriving') return { text: 'заезд на парковку', kmh: 0 };
@@ -564,7 +576,13 @@
         const route = ROUTES[bus.routeId];
         let busDir = null, waitSec = 0;
 
-        if (bus.phase === 'parked' || bus.phase === 'arriving') {
+        if (bus.phase === 'inDepot') return null; // 🆕 в парке не учитываем
+
+        if (bus.phase === 'lunch') {
+            // 🆕 на обеде — считаем как parked, но со временем до отправления
+            busDir = bus.currentTerminal === 'start' ? 1 : -1;
+            waitSec = Math.max(0, (bus.departureTime - simTime) / 1000) + CONFIG.TRANSIT_SEC;
+        } else if (bus.phase === 'parked' || bus.phase === 'arriving') {
             busDir = bus.currentTerminal === 'start' ? 1 : -1;
             waitSec = Math.max(0, (bus.departureTime - simTime) / 1000) + CONFIG.TRANSIT_SEC;
         } else if (bus.phase === 'departing') {
@@ -619,9 +637,6 @@
         return null;
     }
 
-    // ============================================================
-    // ЗАПОЛНЕННОСТЬ
-    // ============================================================
     function seededNoise(seed, x) {
         const s = Math.sin(seed * 12.9898 + x * 78.233) * 43758.5453;
         return s - Math.floor(s);
@@ -650,7 +665,7 @@
     }
 
     function getBusLoad(bus) {
-        if (bus.phase === 'parked') return null;
+        if (bus.phase === 'parked' || bus.phase === 'lunch' || bus.phase === 'inDepot') return null;
 
         const route = ROUTES[bus.routeId];
         const [minPct, maxPct] = getLoadRange(route, simTime);
@@ -687,54 +702,83 @@
         return 'свободно';
     }
 
+    // ============================================================
+    // 🎨 ПОПАП ОСТАНОВКИ — приятный редизайн
+    // ============================================================
     function buildStopPopup(stop, route) {
         const zoneKmh = stop.s <= route.sPort ? route.speed1Kmh : route.speed2Kmh;
-        const arrivals = [];
+        const isFastZone = stop.s > route.sPort;
 
+        const byDir = { 1: [], '-1': [] };
         for (const bus of buses) {
             if (bus.routeId !== route.id) continue;
-            let bestSec = null;
             for (const dir of [1, -1]) {
                 const sec = etaToStop(bus, stop.s, dir);
-                if (sec !== null && (bestSec === null || sec < bestSec)) bestSec = sec;
+                if (sec !== null) byDir[dir].push(sec);
             }
-            if (bestSec !== null) arrivals.push({ bus, sec: bestSec });
         }
-        arrivals.sort((a, b) => a.sec - b.sec);
+        byDir[1].sort((a, b) => a - b);
+        byDir[-1].sort((a, b) => a - b);
 
-        let html = `<div style="font-family: 'Inter', sans-serif; min-width: 260px;">`;
-        html += `<div style="font-weight: 700; font-size: 14px; color: #1f2937; margin-bottom: 4px;">🚏 ${stop.name}</div>`;
-        html += `<div style="font-size: 11px; color: #9ca3af; margin-bottom: 8px;">зона: ~${zoneKmh} км/ч</div>`;
-        html += `<div style="margin-bottom: 10px;">`;
-        html += `<span style="display: inline-block; background: ${route.color}; color: white; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; margin-right: 4px;">${route.id}</span>`;
-        html += `</div>`;
+        const zoneColor = isFastZone ? '#10b981' : '#2563eb';
+        const zoneBg = isFastZone ? '#ecfdf5' : '#eff6ff';
+        const zoneIcon = isFastZone ? 'fa-gauge-high' : 'fa-gauge';
 
-        if (arrivals.length === 0) {
-            html += `<div style="font-size: 12px; color: #9ca3af; padding: 4px 0;">Ближайших автобусов нет</div>`;
+        let html = `<div style="font-family: 'Inter', sans-serif; min-width: 290px; padding: 2px;">`;
+
+        html += `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+            <div style="width: 34px; height: 34px; border-radius: 10px; background: ${zoneBg}; color: ${zoneColor}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px;">
+                <i class="fas fa-location-dot"></i>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="font-weight: 700; font-size: 14px; color: #1f2937; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${stop.name}</div>
+                <div style="display: inline-flex; align-items: center; gap: 4px; margin-top: 3px; padding: 2px 7px; border-radius: 6px; background: ${zoneBg}; color: ${zoneColor}; font-size: 10.5px; font-weight: 600;">
+                    <i class="fas ${zoneIcon}" style="font-size: 9px;"></i>
+                    <span>~${zoneKmh} км/ч</span>
+                </div>
+            </div>
+        </div>`;
+
+        const etaChip = (sec, isFirst) => {
+            const mins = Math.max(1, Math.round(sec / 60));
+            const txt = mins >= 60 ? `${Math.floor(mins/60)}ч ${mins%60}м` : `${mins} мин`;
+            if (isFirst) {
+                return `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 8px; background: ${route.color}; color: #fff; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; box-shadow: 0 1px 3px ${route.color}40;">${txt}</span>`;
+            }
+            return `<span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 8px; background: #f3f4f6; color: #4b5563; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;">${txt}</span>`;
+        };
+
+        const buildDirRow = (dir, secs) => {
+            if (secs.length === 0) return '';
+            const dirName = dir === 1 ? route.directionNames.forward : route.directionNames.backward;
+            const arrowIcon = dir === 1 ? 'fa-arrow-right' : 'fa-arrow-left';
+            const chips = secs.slice(0, 5).map((s, i) => etaChip(s, i === 0)).join('');
+            return `<div style="padding: 10px 0; border-top: 1px solid #f0f0f0;">
+                <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 8px;">
+                    <span style="display: inline-block; background: ${route.color}; color: white; padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 800; letter-spacing: -0.2px;">${route.id}</span>
+                    <i class="fas ${arrowIcon}" style="color: ${route.color}; font-size: 11px;"></i>
+                    <span style="font-size: 12px; font-weight: 600; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${dirName}</span>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 5px;">${chips}</div>
+            </div>`;
+        };
+
+        const row1 = buildDirRow(1, byDir[1]);
+        const row2 = buildDirRow(-1, byDir[-1]);
+
+        if (!row1 && !row2) {
+            html += `<div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #f9fafb; border-radius: 10px; border: 1px dashed #e5e7eb;">
+                <i class="fas fa-moon" style="color: #9ca3af; font-size: 16px;"></i>
+                <div style="font-size: 12px; color: #6b7280; line-height: 1.35;">Сейчас на линии нет автобусов в этом направлении</div>
+            </div>`;
         } else {
-            html += `<div style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Ближайшие автобусы</div>`;
-            for (const { bus, sec } of arrivals.slice(0, 5)) {
-                const busNum = bus.name.replace('Автобус ', '').replace('№', '');
-                const spd = busSpeedLabel(bus);
-                const spdColor = spd.kmh > 0 ? '#6b7280' : '#94a3b8';
-                html += `<div style="padding: 6px 0; border-top: 1px solid #f0f0f0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-                        <span style="color: #1f2937; font-weight: 500;"><i class="fas fa-bus" style="color: ${route.color}; margin-right: 6px; font-size: 11px;"></i>${busNum}</span>
-                        <span style="color: ${route.color}; font-weight: 700;">${formatEta(sec)}</span>
-                    </div>
-                    <div style="font-size: 11px; color: ${spdColor}; margin-top: 2px; margin-left: 17px;">
-                        <i class="fas fa-tachometer-alt" style="font-size: 10px; margin-right: 4px;"></i>${spd.text}
-                    </div>
-                </div>`;
-            }
+            html += row1 + row2;
         }
+
         html += `</div>`;
         return html;
     }
 
-    // ============================================================
-    // ПОЗИЦИЯ / НАПРАВЛЕНИЕ
-    // ============================================================
     function positionAtProgress(route, s) {
         const path = route.path, cum = route.cumPath;
         if (s <= 0) return [path[0][0], path[0][1]];
@@ -761,7 +805,7 @@
     }
 
     function getBusPosition(bus) {
-        if (bus.phase === 'parked') return getParkingPosition(bus);
+        if (bus.phase === 'parked' || bus.phase === 'lunch' || bus.phase === 'inDepot') return getParkingPosition(bus);
         if (bus.phase === 'departing' || bus.phase === 'arriving') {
             const t = 1 - (bus.transitRemaining / CONFIG.TRANSIT_SEC);
             const e = easeInOutCubic(Math.max(0, Math.min(1, t)));
@@ -804,15 +848,12 @@
     }
 
     function getBusDirection(bus) {
-        if (bus.phase === 'parked' || bus.phase === 'arriving') {
+        if (bus.phase === 'parked' || bus.phase === 'arriving' || bus.phase === 'lunch' || bus.phase === 'inDepot') {
             return bus.currentTerminal === 'start' ? 1 : -1;
         }
         return bus.direction;
     }
 
-    // ============================================================
-    // ВЫЧИСЛЕНИЕ ПОЗИЦИИ ПО РАСПИСАНИЮ
-    // ============================================================
     function elapsedToProgress(elapsedSec, direction, route) {
         let timeLeft = elapsedSec;
         let tripP = 0;
@@ -843,6 +884,20 @@
 
     function getBusStateAt(bus, targetMs) {
         const route = ROUTES[bus.routeId];
+
+        // 🆕 Проверка: рабочий день закончился → в парке
+        if (targetMs > getEndOfDayMs(bus, route)) {
+            return {
+                phase: 'inDepot',
+                direction: 1,
+                progress: 0,
+                pauseRemaining: 0,
+                currentTerminal: 'start',
+                departureTime: null,
+                transitFrom: null, transitTo: null, transitRemaining: 0
+            };
+        }
+
         const d = new Date(targetMs);
         const todayStart = new Date(d);
         todayStart.setHours(0, 0, 0, 0);
@@ -925,19 +980,29 @@
         }
 
         const terminal = lastDep.dir > 0 ? 'end' : 'start';
+        const nextDeparture = nextDep ? nextDep.time : findDeparture(
+            terminal === 'start' ? bus.schedule.start : bus.schedule.end, targetMs);
+
+        // 🆕 Обед: стоянка > 30 минут
+        if (nextDeparture - targetMs > CONFIG.LUNCH_THRESHOLD_MS) {
+            return {
+                phase: 'lunch', direction: terminal === 'start' ? 1 : -1,
+                progress: terminal === 'start' ? 0 : route.pathLength,
+                pauseRemaining: 0, currentTerminal: terminal,
+                departureTime: nextDeparture,
+                transitFrom: null, transitTo: null, transitRemaining: 0
+            };
+        }
+
         return {
             phase: 'parked', direction: terminal === 'start' ? 1 : -1,
             progress: terminal === 'start' ? 0 : route.pathLength,
             pauseRemaining: 0, currentTerminal: terminal,
-            departureTime: nextDep ? nextDep.time : findDeparture(
-                terminal === 'start' ? bus.schedule.start : bus.schedule.end, targetMs),
+            departureTime: nextDeparture,
             transitFrom: null, transitTo: null, transitRemaining: 0
         };
     }
 
-    // ============================================================
-    // ИНИЦИАЛИЗАЦИЯ СОСТОЯНИЙ И МАРКЕРОВ
-    // ============================================================
     buses.forEach(bus => {
         const state = getBusStateAt(bus, simTime);
         Object.assign(bus, state);
@@ -948,7 +1013,7 @@
 
     function getDirectionName(bus) {
         const route = ROUTES[bus.routeId];
-        if (bus.phase === 'parked' || bus.phase === 'arriving')
+        if (bus.phase === 'parked' || bus.phase === 'arriving' || bus.phase === 'lunch' || bus.phase === 'inDepot')
             return bus.currentTerminal === 'start' ? route.directionNames.forward : route.directionNames.backward;
         return bus.direction > 0 ? route.directionNames.forward : route.directionNames.backward;
     }
@@ -957,10 +1022,17 @@
         const route = ROUTES[bus.routeId];
         const spd = busSpeedLabel(bus);
 
-        const next = getNextStop(bus);
-        const nextLine = next
-            ? `<b>${next.stop.name}</b> — через ${formatEta(next.sec)}`
-            : '<span style="color:#9ca3af;">—</span>';
+        let nextLine;
+        if (bus.phase === 'inDepot') {
+            nextLine = '<span style="color:#6b7280;">автобус в парке</span>';
+        } else if (bus.phase === 'lunch') {
+            nextLine = `<span style="color:#a855f7;">на обеде · отправление в ${formatTime(bus.departureTime)}</span>`;
+        } else {
+            const next = getNextStop(bus);
+            nextLine = next
+                ? `<b>${next.stop.name}</b> — через ${formatEta(next.sec)}`
+                : '<span style="color:#9ca3af;">—</span>';
+        }
 
         const load = getBusLoad(bus);
         let loadHtml;
@@ -996,12 +1068,14 @@
         const badgePadding = isActive ? '3px 6px' : '2px 5px';
         const badgeGap = 1;
         let bg, icon, anim = '';
-        if (bus.phase === 'parked') { bg = PARKED_COLOR; icon = '<i class="fas fa-pause"></i>'; anim = 'animation: waiting-pulse 2s infinite;'; }
+        if (bus.phase === 'inDepot') { bg = DEPOT_COLOR; icon = '<i class="fas fa-warehouse"></i>'; }
+        else if (bus.phase === 'lunch') { bg = LUNCH_COLOR; icon = '<i class="fas fa-utensils"></i>'; }
+        else if (bus.phase === 'parked') { bg = PARKED_COLOR; icon = '<i class="fas fa-pause"></i>'; anim = 'animation: waiting-pulse 2s infinite;'; }
         else if (bus.phase === 'departing' || bus.phase === 'arriving') { bg = TRANSIT_COLOR; icon = '<i class="fas fa-bus"></i>'; }
         else { bg = route.color; icon = '<i class="fas fa-bus"></i>'; }
 
         let arrow = '';
-        if (bus.phase !== 'parked') {
+        if (bus.phase !== 'parked' && bus.phase !== 'lunch' && bus.phase !== 'inDepot') {
             const angle = busBearing(bus);
             const rad = angle * Math.PI / 180;
             const r = size / 2 + 3;
@@ -1075,7 +1149,7 @@
 
         let effDir = bus.direction;
         let effS   = bus.progress;
-        if (bus.phase === 'parked' || bus.phase === 'arriving') {
+        if (bus.phase === 'parked' || bus.phase === 'arriving' || bus.phase === 'lunch' || bus.phase === 'inDepot') {
             effDir = bus.currentTerminal === 'start' ? 1 : -1;
             effS   = effDir > 0 ? 0 : route.pathLength;
         }
@@ -1112,6 +1186,8 @@
     }
 
     function getStatusText(bus) {
+        if (bus.phase === 'inDepot') return { time: '—', label: 'в парке', color: DEPOT_COLOR };          // 🆕
+        if (bus.phase === 'lunch')   return { time: formatTime(bus.departureTime), label: 'обед · отправление', color: LUNCH_COLOR }; // 🆕
         if (bus.phase === 'parked') return { time: formatTime(bus.departureTime), label: 'отправление (МСК)', color: '#f59e0b' };
         if (bus.phase === 'departing') return { time: 'выезд', label: 'с парковки', color: TRANSIT_COLOR };
         if (bus.phase === 'arriving') return { time: 'заезд', label: 'на парковку', color: TRANSIT_COLOR };
@@ -1175,9 +1251,6 @@
         });
     }
 
-    // ============================================================
-    // ВЫПАДАЮЩИЙ ВЫБОР МАРШРУТА
-    // ============================================================
     let currentSelections = [];
 
     const picker = document.getElementById('routePicker');
@@ -1186,6 +1259,7 @@
     const pickerLabel = document.getElementById('routePickerLabel');
     const pickerClear = document.getElementById('routePickerClear');
 
+    // 🆕 Фильтр «на линии»: обед и парк не считаем
     function updateRouteSummary() {
         const summary = document.getElementById('routeSummary');
         const numEl = document.getElementById('rsNumber');
@@ -1194,6 +1268,7 @@
         if (currentSelections.length === 0) { summary.classList.remove('visible'); return; }
         let count = 0;
         buses.forEach(bus => {
+            if (bus.phase === 'lunch' || bus.phase === 'inDepot') return; // 🆕
             const dir = getBusDirection(bus);
             if (currentSelections.some(s => s.routeId === bus.routeId && s.direction === dir)) count++;
         });
@@ -1311,9 +1386,6 @@
         if (!picker.contains(e.target)) closePicker();
     });
 
-    // ============================================================
-    // ВИДИМОСТЬ
-    // ============================================================
     function updateRouteVisibility() {
         updateRouteSummary();
 
@@ -1361,9 +1433,6 @@
         }
     }
 
-    // ============================================================
-    // АНИМАЦИЯ
-    // ============================================================
     let lastTime = performance.now(), renderAccum = 0, popupAccum = 0, clockAccum = 0;
 
     function animate(now) {
@@ -1378,7 +1447,16 @@
         buses.forEach(bus => {
             const route = ROUTES[bus.routeId];
 
-            if (bus.phase === 'parked') {
+            if (bus.phase === 'inDepot') {
+                // 🆕 В парке: ничего не делаем, пока не начнётся новый рабочий день
+                if (simTime <= getEndOfDayMs(bus, route)) {
+                    const state = getBusStateAt(bus, simTime);
+                    Object.assign(bus, state);
+                    updateBusIcon(bus); updatePopup(bus);
+                }
+            }
+            else if (bus.phase === 'lunch') {
+                // 🆕 На обеде: ждём отправления
                 if (simTime >= bus.departureTime) {
                     const terminal = bus.currentTerminal;
                     bus.phase = 'departing';
@@ -1389,6 +1467,26 @@
                     bus.transitRemaining = CONFIG.TRANSIT_SEC;
                     bus.departureTime = null;
                     updateBusIcon(bus); updatePopup(bus);
+                    renderBusList('all');
+                }
+            }
+            else if (bus.phase === 'parked') {
+                if (simTime >= bus.departureTime) {
+                    const terminal = bus.currentTerminal;
+                    bus.phase = 'departing';
+                    bus.direction = terminal === 'start' ? 1 : -1;
+                    bus.progress = bus.direction > 0 ? 0 : route.pathLength;
+                    bus.transitFrom = getParkingPosition(bus);
+                    bus.transitTo = bus.direction > 0 ? route.path[0] : route.path[route.path.length - 1];
+                    bus.transitRemaining = CONFIG.TRANSIT_SEC;
+                    bus.departureTime = null;
+                    updateBusIcon(bus); updatePopup(bus);
+                    renderBusList('all');
+                } else if (bus.departureTime - simTime > CONFIG.LUNCH_THRESHOLD_MS) {
+                    // 🆕 Стоянка стала длинной → переводим в «обед»
+                    bus.phase = 'lunch';
+                    updateBusIcon(bus); updatePopup(bus);
+                    renderBusList('all');
                 }
             }
             else if (bus.phase === 'departing') {
@@ -1450,8 +1548,17 @@
                 bus.transitRemaining -= dt_sim;
                 if (bus.transitRemaining <= 0) {
                     bus.transitRemaining = 0;
-                    bus.phase = 'parked';
+                    // 🆕 Сразу проверяем: может, это уже обед или даже конец дня
+                    const stayMs = bus.departureTime ? bus.departureTime - simTime : Infinity;
+                    if (bus.departureTime && stayMs > CONFIG.LUNCH_THRESHOLD_MS) {
+                        bus.phase = 'lunch';
+                    } else if (simTime > getEndOfDayMs(bus, route)) {
+                        bus.phase = 'inDepot';
+                    } else {
+                        bus.phase = 'parked';
+                    }
                     updateBusIcon(bus); updatePopup(bus);
+                    renderBusList('all');
                 }
             }
 
